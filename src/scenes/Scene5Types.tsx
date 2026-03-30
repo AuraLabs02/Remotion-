@@ -1,214 +1,221 @@
 import React from 'react';
 import {useCurrentFrame, interpolate, spring, useVideoConfig} from 'remotion';
+import {theme} from '../theme';
 
 export const Scene5Types: React.FC<{startFrame: number}> = ({startFrame}) => {
   const frame = useCurrentFrame();
   const {fps} = useVideoConfig();
   const f = frame - startFrame;
 
-  const sceneIn = interpolate(f, [0, 20], [0, 1], {extrapolateRight: 'clamp'});
-  const sceneOut = interpolate(f, [270, 300], [1, 0], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
-  const opacity = Math.min(sceneIn, sceneOut);
-
-  const titleOpacity = interpolate(f, [0, 25], [0, 1], {extrapolateRight: 'clamp'});
+  const sceneIn  = interpolate(f, [0,20],    [0,1], {extrapolateRight:'clamp'});
+  const sceneOut = interpolate(f, [270,298],  [1,0], {extrapolateLeft:'clamp', extrapolateRight:'clamp'});
+  const opacity  = Math.min(sceneIn, sceneOut);
+  const titleIn  = spring({frame:f-5, fps, config:{damping:22,stiffness:80}});
 
   const types = [
     {
-      name: 'REST API',
-      subtitle: 'Representational State Transfer',
-      icon: '🔄',
-      color: '#00d4ff',
-      pros: ['Simple & Stateless', 'HTTP Methods', 'JSON/XML format', 'Widely supported'],
-      example: 'GET /users/123\nPOST /posts\nDELETE /item/5',
-      badge: 'MOST POPULAR',
-      badgeColor: '#00d4ff',
+      name:'REST API', subtitle:'Representational State Transfer',
+      icon:'🔄', color:theme.accent.blue,   badge:'MOST POPULAR', badgeBg:'#EEF5FF',
+      features:['Stateless communication','HTTP methods (GET/POST/PUT/DELETE)','JSON or XML responses','Simple & widely supported'],
+      code:['GET  /users/123','POST /orders','PUT  /user/42','DEL  /session'],
+      usage:'~80% of all public APIs',
     },
     {
-      name: 'GraphQL',
-      subtitle: 'Query Language for APIs',
-      icon: '⬡',
-      color: '#7b2fff',
-      pros: ['Ask for what you need', 'Single endpoint', 'Strongly typed', 'Real-time subscriptions'],
-      example: 'query {\n  user(id: 123) {\n    name, email\n  }\n}',
-      badge: 'FLEXIBLE',
-      badgeColor: '#7b2fff',
+      name:'GraphQL', subtitle:'Query Language for APIs',
+      icon:'⬡', color:theme.accent.purple,  badge:'FLEXIBLE',     badgeBg:'#F3EEFF',
+      features:['Ask exactly for what you need','Single endpoint, typed schema','Real-time subscriptions','Eliminates over-fetching'],
+      code:['query {','  user(id: "1") {','    name','    email','  }','}'],
+      usage:'Facebook, GitHub, Shopify',
     },
     {
-      name: 'WebSocket',
-      subtitle: 'Full-Duplex Communication',
-      icon: '⚡',
-      color: '#00ff88',
-      pros: ['Real-time bidirectional', 'Low latency', 'Persistent connection', 'Push notifications'],
-      example: 'ws.connect(url)\nws.onmessage(data)\nws.send("ping")',
-      badge: 'REAL-TIME',
-      badgeColor: '#00ff88',
+      name:'WebSocket', subtitle:'Full-Duplex Real-Time',
+      icon:'⚡', color:theme.accent.green,   badge:'REAL-TIME',    badgeBg:'#EAFAF4',
+      features:['Persistent bi-directional','Ultra-low latency (<10ms)','Server push without polling','Chat, trading, live gaming'],
+      code:['ws.connect(url)','ws.on("message", fn)','ws.send({ ping: true })','// Server → Client push'],
+      usage:'Slack, Binance, multiplayer',
     },
     {
-      name: 'gRPC',
-      subtitle: 'Remote Procedure Calls',
-      icon: '🚀',
-      color: '#ffb347',
-      pros: ['Protocol Buffers', 'Ultra fast', 'Type safe', 'Microservices'],
-      example: 'service UserService {\n  rpc GetUser\n  (UserReq) returns (User)\n}',
-      badge: 'ULTRA FAST',
-      badgeColor: '#ffb347',
+      name:'gRPC', subtitle:'Remote Procedure Call',
+      icon:'🚀', color:theme.accent.orange,  badge:'ULTRA FAST',   badgeBg:'#FFF4EE',
+      features:['Protocol Buffers (binary)','10× faster than REST','Strongly typed contracts','Microservice-to-microservice'],
+      code:['service UserSvc {','  rpc GetUser','    (Request)','    returns (User);','}'],
+      usage:'Google, Netflix, Uber',
     },
   ];
 
-  const cardWidth = 400;
-  const cardHeight = 380;
-  const startX = 70;
-  const startY = 190;
-  const gapX = 430;
+  // Taller cards (ch=535) starting at y=205 → fills to y=740
+  const cw=425, ch=535;
+  const totalW = types.length*cw+(types.length-1)*28;
+  const sx = (1920-totalW)/2;
+  const sy = 205;
+
+  const highlighted = Math.floor(f/80)%4;
+
+  // Comparison bar at bottom
+  const barIn = interpolate(f,[180,210],[0,1],{extrapolateRight:'clamp'});
 
   return (
     <g opacity={opacity}>
+      <defs>
+        <radialGradient id="s5-bg" cx="50%" cy="40%" r="65%">
+          <stop offset="0%"   stopColor="#F9F6FF"/>
+          <stop offset="100%" stopColor="#FFFFFF"/>
+        </radialGradient>
+        <pattern id="s5-dots" width="44" height="44" patternUnits="userSpaceOnUse">
+          <circle cx="22" cy="22" r="1.2" fill={theme.accent.purple} opacity="0.07"/>
+        </pattern>
+      </defs>
+      <rect width={1920} height={1080} fill="url(#s5-bg)"/>
+      <rect width={1920} height={1080} fill="url(#s5-dots)"/>
+
       {/* Title */}
-      <g opacity={titleOpacity}>
-        <text x={960} y={70} textAnchor="middle" fontSize={18} fontFamily="Arial" fontWeight="600" fill="#7b2fff" letterSpacing={6}>
-          TYPES OF APIS
+      <g opacity={titleIn} transform={`translate(0,${(1-titleIn)*-20})`}>
+        <text x={960} y={72} textAnchor="middle" fontSize={13}
+          fontFamily="system-ui" fontWeight="700" fill={theme.accent.purple} letterSpacing={6}>
+          SCENE 04 — TYPES
         </text>
-        <text
-          x={960}
-          y={130}
-          textAnchor="middle"
-          fontSize={52}
-          fontFamily="'Arial Black', sans-serif"
-          fontWeight="900"
-          fill="#ffffff"
-          style={{filter: 'drop-shadow(0 0 20px #7b2fff)'}}
-        >
+        <text x={960} y={136} textAnchor="middle" fontSize={64}
+          fontFamily="system-ui" fontWeight="800" fill={theme.text.primary}>
           Choose Your Protocol
         </text>
-        <rect x={710} y={150} width={500} height={2} rx={1} fill="url(#types-grad)" opacity={0.8} />
-        <defs>
-          <linearGradient id="types-grad" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="transparent" />
-            <stop offset="50%" stopColor="#7b2fff" />
-            <stop offset="100%" stopColor="transparent" />
-          </linearGradient>
-        </defs>
+        <text x={960} y={178} textAnchor="middle" fontSize={22}
+          fontFamily="system-ui" fontWeight="400" fill={theme.text.secondary}>
+          REST, GraphQL, WebSocket, gRPC — each built for different needs
+        </text>
+        <rect x={880} y={192} width={160} height={3} rx={2} fill={theme.accent.purple} opacity={0.5}/>
       </g>
 
-      {/* Type cards */}
-      {types.map((type, i) => {
-        const cardIn = spring({frame: f - (20 + i * 18), fps, config: {damping: 14, stiffness: 90}});
-        const detailsIn = interpolate(f, [60 + i * 18, 100 + i * 18], [0, 1], {extrapolateRight: 'clamp'});
-        const cx = startX + i * gapX;
-        const cy = startY;
-        const float = Math.sin(f * 0.04 + i * 0.8) * 6;
+      {/* Cards */}
+      {types.map((t,i)=>{
+        const cx=sx+i*(cw+28);
+        const cardIn=spring({frame:f-(20+i*16), fps, config:{damping:18,stiffness:90}});
+        const detailIn=interpolate(f,[58+i*16,96+i*16],[0,1],{extrapolateRight:'clamp'});
+        const isHigh=highlighted===i;
+        const floatY=Math.sin(f*0.04+i*1.1)*6;
+        const pulse=0.5+0.5*Math.sin(f*0.08+i);
 
-        // Animated line indicator (like a waveform for active type)
-        const isHighlighted = Math.floor(f / 90) % 4 === i;
-        const waveOpacity = isHighlighted ? 0.8 : 0.3;
+        const bars=Array.from({length:10}).map((_,bi)=>({
+          h:8+Math.sin(f*0.12+i+bi*0.7)*(isHigh?18:6),
+        }));
 
         return (
-          <g key={i} opacity={cardIn} transform={`translate(0, ${float})`}>
-            {/* Card glow */}
-            <rect
-              x={cx - 4}
-              y={cy - 4}
-              width={cardWidth + 8}
-              height={cardHeight + 8}
-              rx={18}
-              fill={type.color}
-              opacity={isHighlighted ? 0.12 : 0.04}
-            />
-
-            {/* Card body */}
-            <rect
-              x={cx}
-              y={cy}
-              width={cardWidth}
-              height={cardHeight}
-              rx={14}
-              fill="#080e1c"
-              stroke={type.color}
-              strokeWidth={isHighlighted ? 2.5 : 1.5}
-            />
-
-            {/* Top gradient bar */}
+          <g key={i} opacity={cardIn} transform={`translate(0,${floatY})`}>
+            {isHigh && (
+              <rect x={cx-5} y={sy-5} width={cw+10} height={ch+10} rx={22}
+                fill={t.color} opacity={0.07+0.03*pulse}/>
+            )}
+            {/* Shadow */}
+            <rect x={cx+2} y={sy+6} width={cw} height={ch} rx={18}
+              fill={t.color} opacity={0.07}/>
+            {/* Card */}
+            <rect x={cx} y={sy} width={cw} height={ch} rx={18}
+              fill="#FFFFFF"
+              stroke={isHigh?t.color:theme.border.light}
+              strokeWidth={isHigh?2.5:1.5}/>
+            {/* Top gradient strip */}
             <defs>
-              <linearGradient id={`card-top-${i}`} x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor={type.color} stopOpacity="0.6" />
-                <stop offset="100%" stopColor={type.color} stopOpacity="0.1" />
+              <linearGradient id={`s5-top-${i}`} x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%"   stopColor={t.color} stopOpacity="0.85"/>
+                <stop offset="100%" stopColor={t.color} stopOpacity="0.20"/>
               </linearGradient>
             </defs>
-            <rect x={cx} y={cy} width={cardWidth} height={6} rx={3} fill={`url(#card-top-${i})`} />
+            <rect x={cx} y={sy} width={cw} height={5} rx={3} fill={`url(#s5-top-${i})`}/>
 
             {/* Badge */}
-            <rect
-              x={cx + cardWidth - 110}
-              y={cy + 15}
-              width={100}
-              height={24}
-              rx={12}
-              fill={`${type.color}25`}
-              stroke={type.color}
-              strokeWidth={1}
-            />
-            <text x={cx + cardWidth - 60} y={cy + 28} textAnchor="middle" dominantBaseline="middle" fontSize={10} fontFamily="'Arial Black', sans-serif" fontWeight="800" fill={type.color} letterSpacing={1}>
-              {type.badge}
-            </text>
+            <rect x={cx+cw-112} y={sy+16} width={98} height={22} rx={11}
+              fill={t.badgeBg}/>
+            <text x={cx+cw-63} y={sy+27} textAnchor="middle" dominantBaseline="middle"
+              fontSize={10} fontFamily="system-ui" fontWeight="700"
+              fill={t.color} letterSpacing={1}>{t.badge}</text>
 
             {/* Icon */}
-            <text x={cx + 40} y={cy + 55} textAnchor="middle" dominantBaseline="middle" fontSize={40}>
-              {type.icon}
-            </text>
+            <circle cx={cx+40} cy={sy+57} r={28} fill={t.color} opacity={0.09}/>
+            <text x={cx+40} y={sy+57} textAnchor="middle" dominantBaseline="middle" fontSize={34}>{t.icon}</text>
 
-            {/* Name */}
-            <text x={cx + 75} y={cy + 38} textAnchor="start" fontSize={22} fontFamily="'Arial Black', sans-serif" fontWeight="900" fill={type.color} letterSpacing={1}>
-              {type.name}
-            </text>
-            <text x={cx + 75} y={cy + 60} textAnchor="start" fontSize={11} fontFamily="Arial, sans-serif" fill="#6688aa">
-              {type.subtitle}
-            </text>
+            {/* Header */}
+            <text x={cx+80} y={sy+44} fontSize={21}
+              fontFamily="system-ui" fontWeight="800" fill={theme.text.primary}>{t.name}</text>
+            <text x={cx+80} y={sy+66} fontSize={12}
+              fontFamily="system-ui" fill={theme.text.muted}>{t.subtitle}</text>
 
             {/* Divider */}
-            <rect x={cx + 20} y={cy + 80} width={cardWidth - 40} height={1} fill={type.color} opacity={0.2} />
+            <line x1={cx+20} y1={sy+86} x2={cx+cw-20} y2={sy+86}
+              stroke={theme.border.light} strokeWidth={1}/>
 
-            {/* Features list */}
-            <g opacity={detailsIn}>
-              {type.pros.map((pro, pi) => (
-                <g key={pi}>
-                  <circle cx={cx + 30} cy={cy + 108 + pi * 32} r={4} fill={type.color} opacity={0.8} />
-                  <text x={cx + 46} y={cy + 113 + pi * 32} fontSize={14} fontFamily="Arial, sans-serif" fill="#c0d0e0">
-                    {pro}
-                  </text>
+            {/* Features */}
+            <g opacity={detailIn}>
+              {t.features.map((feat,fi)=>(
+                <g key={fi}>
+                  <circle cx={cx+34} cy={sy+110+fi*33} r={5}
+                    fill={t.color} opacity={0.7}/>
+                  <text x={cx+50} y={sy+115+fi*33} dominantBaseline="middle"
+                    fontSize={14} fontFamily="system-ui" fill={theme.text.secondary}>{feat}</text>
                 </g>
               ))}
 
-              {/* Code example */}
-              <rect x={cx + 16} y={cy + 242} width={cardWidth - 32} height={112} rx={8} fill="#050a14" stroke={`${type.color}40`} strokeWidth={1} />
-              <text x={cx + 26} y={cy + 260} fontSize={10} fontFamily="'Courier New', monospace" fill={type.color} fontWeight="bold" opacity={0.6}>
-                example
-              </text>
-              {type.example.split('\n').map((line, li) => (
-                <text key={li} x={cx + 26} y={cy + 278 + li * 18} fontSize={11} fontFamily="'Courier New', monospace" fill="#a0c8e0">
-                  {line}
-                </text>
+              {/* Code block */}
+              <rect x={cx+18} y={sy+250} width={cw-36} height={t.code.length*22+20} rx={10}
+                fill={theme.bg.code} stroke={theme.border.light} strokeWidth={1}/>
+              <text x={cx+32} y={sy+268} fontSize={11}
+                fontFamily="system-ui" fontWeight="600" fill={t.color} opacity={0.5}>example</text>
+              {t.code.map((line,li)=>(
+                <text key={li} x={cx+32} y={sy+286+li*22} fontSize={13}
+                  fontFamily="'SF Mono','Fira Code',monospace" fill={t.color}
+                  opacity={0.85}>{line}</text>
               ))}
+
+              {/* Usage */}
+              <text x={cx+20} y={sy+ch-50} fontSize={12}
+                fontFamily="system-ui" fill={theme.text.muted} fontStyle="italic">
+                Used by: {t.usage}
+              </text>
             </g>
 
-            {/* Waveform activity indicator */}
-            {Array.from({length: 8}).map((_, wi) => {
-              const wh = 6 + Math.sin(f * 0.15 + i + wi * 0.8) * 14;
-              return (
-                <rect
-                  key={wi}
-                  x={cx + 20 + wi * 16}
-                  y={cy + cardHeight - 20 - wh / 2}
-                  width={10}
-                  height={wh}
-                  rx={3}
-                  fill={type.color}
-                  opacity={waveOpacity * 0.6}
-                />
-              );
-            })}
+            {/* Waveform activity bars */}
+            {bars.map((bar,bi)=>(
+              <rect key={bi}
+                x={cx+18+bi*18} y={sy+ch-22-bar.h/2}
+                width={12} height={bar.h} rx={4}
+                fill={t.color} opacity={isHigh?0.55:0.20}/>
+            ))}
           </g>
         );
       })}
+
+      {/* Comparison table at bottom */}
+      <g opacity={barIn} transform={`translate(0,${(1-barIn)*16})`}>
+        <rect x={60} y={758} width={1800} height={54} rx={12}
+          fill="#FFFFFF" stroke={theme.border.light} strokeWidth={1.5}
+          style={{filter:'drop-shadow(0 2px 10px rgba(0,0,0,0.05))'}}/>
+        {/* Headers */}
+        {['', 'Complexity', 'Speed', 'Best For', 'Real-Time'].map((h,i)=>(
+          <text key={i} x={[90,380,640,900,1380][i]} y={786}
+            textAnchor={i===0?'start':'middle'} dominantBaseline="middle"
+            fontSize={12} fontFamily="system-ui" fontWeight="700"
+            fill={theme.text.muted} letterSpacing={2}>{h}</text>
+        ))}
+        {/* Protocol rows */}
+        {types.map((t,i)=>{
+          const vals=[
+            ['Low','High','CRUD / standard APIs','No'],
+            ['Medium','High','Complex nested data','Yes (subscriptions)'],
+            ['Low','Very High','Chat / live data','Yes (native)'],
+            ['High','Ultra','Microservices','Streaming'],
+          ][i];
+          return (
+            <g key={i}>
+              <rect x={[86,340,600,860,1340][0]} y={798+i*28} width={8} height={18} rx={4} fill={t.color}/>
+              <text x={102} y={807+i*28} dominantBaseline="middle"
+                fontSize={12} fontFamily="system-ui" fontWeight="700" fill={t.color}>{t.name}</text>
+              {vals.map((v,vi)=>(
+                <text key={vi} x={[380,640,900,1380][vi]} y={807+i*28}
+                  textAnchor="middle" dominantBaseline="middle"
+                  fontSize={12} fontFamily="system-ui" fill={theme.text.secondary}>{v}</text>
+              ))}
+            </g>
+          );
+        })}
+      </g>
     </g>
   );
 };

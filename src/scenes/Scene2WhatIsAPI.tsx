@@ -1,170 +1,106 @@
 import React from 'react';
 import {useCurrentFrame, interpolate, spring, useVideoConfig} from 'remotion';
-import {interpolateWithEasing, easeOutElastic} from '../utils';
+import {theme} from '../theme';
 
 export const Scene2WhatIsAPI: React.FC<{startFrame: number}> = ({startFrame}) => {
   const frame = useCurrentFrame();
   const {fps} = useVideoConfig();
   const f = frame - startFrame;
 
-  const sceneIn = interpolate(f, [0, 20], [0, 1], {extrapolateRight: 'clamp'});
-  const sceneOut = interpolate(f, [240, 270], [1, 0], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
-  const opacity = Math.min(sceneIn, sceneOut);
+  const sceneIn  = interpolate(f, [0,20],    [0,1], {extrapolateRight:'clamp'});
+  const sceneOut = interpolate(f, [240,268],  [1,0], {extrapolateLeft:'clamp', extrapolateRight:'clamp'});
+  const opacity  = Math.min(sceneIn, sceneOut);
 
-  // Waiter metaphor positions
-  const customerX = 250;
-  const waiterX = 960;
-  const kitchenX = 1670;
-  const centerY = 420;
+  const titleIn  = spring({frame:f-5,  fps, config:{damping:22,stiffness:80}});
+  const clientIn = spring({frame:f-22, fps, config:{damping:18,stiffness:80}});
+  const apiIn    = spring({frame:f-48, fps, config:{damping:18,stiffness:80}});
+  const serverIn = spring({frame:f-72, fps, config:{damping:18,stiffness:80}});
 
-  // Elements appear timings
-  const customerIn = spring({frame: f - 15, fps, config: {damping: 14, stiffness: 100}});
-  const waiterIn = spring({frame: f - 40, fps, config: {damping: 14, stiffness: 100}});
-  const kitchenIn = spring({frame: f - 65, fps, config: {damping: 14, stiffness: 100}});
+  // Arrow draw progress
+  const a1P = interpolate(f, [88, 125],  [0,1], {extrapolateRight:'clamp'});
+  const a2P = interpolate(f, [125,160],  [0,1], {extrapolateRight:'clamp'});
+  const a3P = interpolate(f, [160,195],  [0,1], {extrapolateRight:'clamp'});
+  const a4P = interpolate(f, [195,230],  [0,1], {extrapolateRight:'clamp'});
 
-  // Arrow animations
-  const arrow1Progress = interpolate(f, [80, 120], [0, 1], {extrapolateRight: 'clamp'});
-  const arrow2Progress = interpolate(f, [120, 160], [0, 1], {extrapolateRight: 'clamp'});
-  const arrow3Progress = interpolate(f, [160, 200], [0, 1], {extrapolateRight: 'clamp'});
-  const arrow4Progress = interpolate(f, [200, 240], [0, 1], {extrapolateRight: 'clamp'});
+  const bubblesIn = interpolate(f, [155,185], [0,1], {extrapolateRight:'clamp'});
+  const defIn     = interpolate(f, [192,222], [0,1], {extrapolateRight:'clamp'});
 
-  // Labels
-  const labelsOpacity = interpolate(f, [70, 90], [0, 1], {extrapolateRight: 'clamp'});
-  const titleOpacity = interpolate(f, [0, 25], [0, 1], {extrapolateRight: 'clamp'});
+  // Node layout – larger cards, better vertical position
+  const cw = 270, ch = 195;
+  const cy  = 540;  // pushed down from 500
+  const clientX = 265, apiX = 960, serverX = 1655;
 
-  // Floating animation
-  const float = Math.sin(f * 0.05) * 8;
-  const float2 = Math.sin(f * 0.05 + 1) * 8;
-  const float3 = Math.sin(f * 0.05 + 2) * 8;
+  // Float – used for visual only, NOT for arrow y calcs (fix double-float issue)
+  const floatA = Math.sin(f*0.045+0) * 8;
+  const floatB = Math.sin(f*0.045+1) * 8;
+  const floatC = Math.sin(f*0.045+2) * 8;
 
-  const drawCircleNode = (
-    cx: number,
-    cy: number,
-    scale: number,
-    color: string,
-    icon: string,
-    label: string,
-    sublabel: string,
-    floatOffset: number
-  ) => (
-    <g transform={`translate(0, ${floatOffset})`} opacity={scale}>
-      {/* Outer glow ring */}
-      <circle
-        cx={cx}
-        cy={cy}
-        r={105 * scale}
-        fill="none"
-        stroke={color}
-        strokeWidth={2}
-        opacity={0.3}
-        strokeDasharray="8 4"
-      />
-      {/* Glow */}
-      <circle cx={cx} cy={cy} r={85 * scale} fill={color} opacity={0.08} />
-      {/* Main circle */}
-      <circle
-        cx={cx}
-        cy={cy}
-        r={80 * scale}
-        fill={`${color}18`}
-        stroke={color}
-        strokeWidth={2.5}
-      />
-      {/* Icon */}
-      <text
-        x={cx}
-        y={cy - 10}
-        textAnchor="middle"
-        dominantBaseline="middle"
-        fontSize={52 * scale}
-        style={{userSelect: 'none'}}
-      >
-        {icon}
-      </text>
+  // Arrow track y – static, no float
+  const reqY  = cy - 28;
+  const resY  = cy + 28;
+
+  const NodeCard = ({
+    cx, scale, color, icon, label, sub, floatOffset,
+  }: {
+    cx:number; scale:number; color:string;
+    icon:string; label:string; sub:string; floatOffset:number;
+  }) => (
+    <g opacity={scale} transform={`translate(${cx-cw/2},${cy-ch/2+floatOffset})`}>
+      {/* Shadow */}
+      <rect x={3} y={7} width={cw} height={ch} rx={18} fill={color} opacity={0.10}/>
+      {/* Card */}
+      <rect x={0} y={0} width={cw} height={ch} rx={18}
+        fill="#FFFFFF" stroke={color} strokeWidth={2}/>
+      {/* Top strip */}
+      <rect x={0} y={0} width={cw} height={5} rx={3} fill={color}/>
+      {/* Icon bg */}
+      <circle cx={cw/2} cy={72} r={34} fill={color} opacity={0.08}/>
+      <circle cx={cw/2} cy={72} r={24} fill={color} opacity={0.12}/>
+      <text x={cw/2} y={72} textAnchor="middle" dominantBaseline="middle" fontSize={32}>{icon}</text>
       {/* Label */}
-      <text
-        x={cx}
-        y={cy + 48 * scale}
-        textAnchor="middle"
-        fontSize={20 * scale}
-        fontFamily="'Arial Black', sans-serif"
-        fontWeight="800"
-        fill={color}
-        letterSpacing={2}
-      >
-        {label}
-      </text>
-      {/* Sub label */}
-      <text
-        x={cx}
-        y={cy + 75 * scale}
-        textAnchor="middle"
-        fontSize={13 * scale}
-        fontFamily="Arial, sans-serif"
-        fill="#8899aa"
-        letterSpacing={1}
-      >
-        {sublabel}
-      </text>
+      <text x={cw/2} y={120} textAnchor="middle"
+        fontSize={17} fontFamily="system-ui,sans-serif" fontWeight="800"
+        fill={color} letterSpacing={2}>{label}</text>
+      <text x={cw/2} y={146} textAnchor="middle"
+        fontSize={13} fontFamily="system-ui,sans-serif" fill={theme.text.muted}>{sub}</text>
+      {/* Pulse dot */}
+      <circle cx={cw-22} cy={22} r={6} fill={color} opacity={0.5+0.3*Math.sin(f*0.08)}/>
     </g>
   );
 
-  const drawArrow = (
-    x1: number,
-    y1: number,
-    x2: number,
-    y2: number,
-    progress: number,
-    color: string,
-    label: string,
-    isReturn: boolean = false
-  ) => {
-    const currentX = x1 + (x2 - x1) * progress;
-    if (progress <= 0) return null;
-    const midX = (x1 + x2) / 2;
+  const Arrow = ({
+    x1,x2,y,progress,color,label,above,
+  }:{x1:number;x2:number;y:number;progress:number;color:string;label:string;above:boolean}) => {
+    if (progress<=0) return null;
+    const ex = x1+(x2-x1)*Math.min(progress,1);
+    const midX = (x1+x2)/2;
+    const labelY = above ? y-30 : y+24;
     return (
       <g>
-        <defs>
-          <marker
-            id={`arrow-${color.replace('#', '')}-${isReturn ? 'r' : 'f'}`}
-            markerWidth="10"
-            markerHeight="7"
-            refX="9"
-            refY="3.5"
-            orient="auto"
-          >
-            <polygon points="0 0, 10 3.5, 0 7" fill={color} />
-          </marker>
-        </defs>
-        {/* Dashed line path */}
-        <line
-          x1={x1}
-          y1={y1}
-          x2={currentX}
-          y2={y2}
-          stroke={color}
-          strokeWidth={2.5}
-          strokeDasharray="8 4"
-          opacity={0.6}
-          markerEnd={progress >= 1 ? `url(#arrow-${color.replace('#', '')}-${isReturn ? 'r' : 'f'})` : undefined}
-        />
-        {/* Glowing dot moving along path */}
-        <circle cx={currentX} cy={y1 + (y2 - y1) * progress} r={6} fill={color} opacity={0.9} />
-        <circle cx={currentX} cy={y1 + (y2 - y1) * progress} r={12} fill={color} opacity={0.2} />
-        {/* Label */}
-        {progress >= 1 && (
-          <text
-            x={midX}
-            y={y1 + (isReturn ? 30 : -18)}
-            textAnchor="middle"
-            fontSize={14}
-            fontFamily="'Courier New', monospace"
-            fill={color}
-            fontWeight="bold"
-            opacity={0.85}
-          >
-            {label}
-          </text>
+        {/* Track */}
+        <line x1={x1} y1={y} x2={x2} y2={y}
+          stroke={theme.border.light} strokeWidth={2}/>
+        {/* Live line */}
+        <line x1={x1} y1={y} x2={ex} y2={y}
+          stroke={color} strokeWidth={2.5} strokeLinecap="round"/>
+        {/* Moving dot halo */}
+        <circle cx={ex} cy={y} r={14} fill={color} opacity={0.12}/>
+        <circle cx={ex} cy={y} r={6}  fill={color}/>
+        {/* Arrowhead */}
+        {progress>=1 && (
+          <polygon
+            points={`${x2+11},${y} ${x2-5},${y-7} ${x2-5},${y+7}`}
+            fill={color}/>
+        )}
+        {/* Label pill */}
+        {progress>=0.5 && (
+          <g opacity={interpolate(progress,[0.5,1],[0,1])}>
+            <rect x={midX-62} y={labelY-13} width={124} height={26} rx={13}
+              fill={color} opacity={0.10}/>
+            <text x={midX} y={labelY} textAnchor="middle" dominantBaseline="middle"
+              fontSize={12} fontFamily="'SF Mono',monospace" fontWeight="700"
+              fill={color}>{label}</text>
+          </g>
         )}
       </g>
     );
@@ -173,117 +109,117 @@ export const Scene2WhatIsAPI: React.FC<{startFrame: number}> = ({startFrame}) =>
   return (
     <g opacity={opacity}>
       <defs>
-        <filter id="node-glow">
-          <feGaussianBlur stdDeviation="6" result="blur" />
-          <feMerge>
-            <feMergeNode in="blur" />
-            <feMergeNode in="SourceGraphic" />
-          </feMerge>
-        </filter>
+        <radialGradient id="s2-bg" cx="50%" cy="50%" r="70%">
+          <stop offset="0%"   stopColor="#F0F5FF"/>
+          <stop offset="100%" stopColor="#FFFFFF"/>
+        </radialGradient>
+        <pattern id="s2-grid" width="60" height="60" patternUnits="userSpaceOnUse">
+          <path d="M 60 0 L 0 0 0 60" fill="none" stroke={theme.border.light} strokeWidth="0.8"/>
+        </pattern>
       </defs>
 
-      {/* Section title */}
-      <g opacity={titleOpacity}>
-        <text
-          x={960}
-          y={80}
-          textAnchor="middle"
-          fontSize={20}
-          fontFamily="Arial, sans-serif"
-          fontWeight="600"
-          fill="#7b2fff"
-          letterSpacing={6}
-        >
-          WHAT IS AN API?
+      <rect width={1920} height={1080} fill="url(#s2-bg)"/>
+      <rect width={1920} height={1080} fill="url(#s2-grid)" opacity={0.55}/>
+
+      {/* Title */}
+      <g opacity={titleIn} transform={`translate(0,${(1-titleIn)*-22})`}>
+        <text x={960} y={72} textAnchor="middle"
+          fontSize={13} fontFamily="system-ui,sans-serif" fontWeight="700"
+          fill={theme.accent.purple} letterSpacing={6}>
+          SCENE 01 — CONCEPT
         </text>
-        <text
-          x={960}
-          y={130}
-          textAnchor="middle"
-          fontSize={58}
-          fontFamily="'Arial Black', Impact, sans-serif"
-          fontWeight="900"
-          fill="#ffffff"
-          letterSpacing={3}
-          style={{filter: 'drop-shadow(0 0 20px #7b2fff)'}}
-        >
+        <text x={960} y={138} textAnchor="middle"
+          fontSize={66} fontFamily="system-ui,sans-serif" fontWeight="800"
+          fill={theme.text.primary}>
           The Restaurant Analogy
         </text>
-        <rect x={660} y={150} width={600} height={2} rx={1} fill="url(#line-gradient-2)" opacity={0.7} />
-        <defs>
-          <linearGradient id="line-gradient-2" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="transparent" />
-            <stop offset="50%" stopColor="#7b2fff" />
-            <stop offset="100%" stopColor="transparent" />
-          </linearGradient>
-        </defs>
+        <text x={960} y={182} textAnchor="middle"
+          fontSize={22} fontFamily="system-ui,sans-serif" fontWeight="400"
+          fill={theme.text.secondary}>
+          APIs act as a bridge — the waiter between you and the kitchen
+        </text>
+        <rect x={860} y={196} width={200} height={3} rx={2} fill={theme.accent.purple} opacity={0.45}/>
       </g>
 
-      {/* Three nodes */}
-      {drawCircleNode(customerX, centerY, customerIn, '#00ff88', '👤', 'YOU (CLIENT)', 'The App / Browser', float)}
-      {drawCircleNode(waiterX, centerY, waiterIn, '#00d4ff', '🔗', 'API', 'The Waiter / Bridge', float2)}
-      {drawCircleNode(kitchenX, centerY, kitchenIn, '#ff6b6b', '🗄️', 'SERVER', 'The Kitchen / Database', float3)}
+      {/* Nodes */}
+      <NodeCard cx={clientX} scale={clientIn} color={theme.accent.blue}
+        icon="👤" label="CLIENT" sub="Your App / Browser" floatOffset={floatA}/>
+      <NodeCard cx={apiX}    scale={apiIn}    color={theme.accent.purple}
+        icon="🔗" label="API"    sub="The Bridge / Waiter"  floatOffset={floatB}/>
+      <NodeCard cx={serverX} scale={serverIn} color={theme.accent.green}
+        icon="🗄️" label="SERVER" sub="Backend + Database"  floatOffset={floatC}/>
 
-      {/* Arrows - Request flow */}
-      {drawArrow(customerX + 85, centerY - 20, waiterX - 85, centerY - 20, arrow1Progress, '#00ff88', 'REQUEST →', false)}
-      {drawArrow(waiterX + 85, centerY - 20, kitchenX - 85, centerY - 20, arrow2Progress, '#00d4ff', 'FETCH DATA →', false)}
+      {/* Arrows – static y positions */}
+      <Arrow x1={clientX+cw/2} x2={apiX-cw/2}   y={reqY} progress={a1P}
+        color={theme.accent.blue}   label="① request"    above={true}/>
+      <Arrow x1={apiX+cw/2}   x2={serverX-cw/2} y={reqY} progress={a2P}
+        color={theme.accent.purple} label="② fetch data"  above={true}/>
+      <Arrow x1={serverX-cw/2} x2={apiX+cw/2}   y={resY} progress={a3P}
+        color={theme.accent.green}  label="③ response"   above={false}/>
+      <Arrow x1={apiX-cw/2}   x2={clientX+cw/2} y={resY} progress={a4P}
+        color={theme.accent.orange} label="④ result"     above={false}/>
 
-      {/* Response flow */}
-      {drawArrow(kitchenX - 85, centerY + 20, waiterX + 85, centerY + 20, arrow3Progress, '#ff6b6b', '← RESPONSE', true)}
-      {drawArrow(waiterX - 85, centerY + 20, customerX + 85, centerY + 20, arrow4Progress, '#ffb347', '← RESULT', true)}
-
-      {/* Bottom explanation */}
-      <g opacity={labelsOpacity}>
+      {/* Analogy speech bubbles */}
+      <g opacity={bubblesIn}>
         {[
-          {x: customerX, text: '"I want pasta"', color: '#00ff88'},
-          {x: waiterX, text: '"Order: pasta"', color: '#00d4ff'},
-          {x: kitchenX, text: '"Here is pasta"', color: '#ff6b6b'},
-        ].map((item, i) => (
-          <g key={i}>
-            <rect
-              x={item.x - 110}
-              y={centerY + 130}
-              width={220}
-              height={44}
-              rx={22}
-              fill={`${item.color}15`}
-              stroke={item.color}
-              strokeWidth={1.5}
-              opacity={0.8}
-            />
-            <text
-              x={item.x}
-              y={centerY + 153}
-              textAnchor="middle"
-              dominantBaseline="middle"
-              fontSize={15}
-              fontFamily="'Courier New', monospace"
-              fill={item.color}
-              fontWeight="bold"
-            >
-              {item.text}
-            </text>
-          </g>
-        ))}
+          {x:clientX, text:'"I want weather data"',    color:theme.accent.blue},
+          {x:apiX,    text:'"GET /weather?city=NYC"',  color:theme.accent.purple},
+          {x:serverX, text:'{ "temp": "72°F" }',       color:theme.accent.green},
+        ].map((b,i)=>{
+          const tw = b.text.length*7.4+28;
+          return (
+            <g key={i}>
+              <rect x={b.x-tw/2} y={cy+ch/2+24} width={tw} height={32} rx={16}
+                fill={b.color} opacity={0.1} stroke={b.color} strokeWidth={1.5}/>
+              <text x={b.x} y={cy+ch/2+41} textAnchor="middle" dominantBaseline="middle"
+                fontSize={13} fontFamily="'SF Mono','Fira Code',monospace" fontWeight="500"
+                fill={b.color}>{b.text}</text>
+            </g>
+          );
+        })}
       </g>
 
-      {/* Bottom callout */}
-      {f > 160 && (
-        <g opacity={interpolate(f, [160, 190], [0, 1], {extrapolateRight: 'clamp'})}>
-          <rect x={560} y={700} width={800} height={80} rx={16}
-            fill="#0d1a2e" stroke="#00d4ff" strokeWidth={1.5} opacity={0.9} />
-          <text x={960} y={733} textAnchor="middle" fontSize={17} fill="#8899aa" fontFamily="Arial, sans-serif">
-            An API is a
-          </text>
-          <text x={1035} y={733} textAnchor="start" fontSize={17} fill="#00d4ff" fontFamily="Arial, sans-serif" fontWeight="bold">
-            &nbsp;contract between software systems —
-          </text>
-          <text x={960} y={762} textAnchor="middle" fontSize={17} fill="#8899aa" fontFamily="Arial, sans-serif">
-            defining how to
-          </text>
-          <text x={1030} y={762} textAnchor="start" fontSize={17} fill="#7b2fff" fontFamily="Arial, sans-serif" fontWeight="bold">
-            &nbsp;request and receive data
-          </text>
+      {/* Definition callout */}
+      <g opacity={defIn} transform={`translate(0,${(1-defIn)*18})`}>
+        <rect x={360} y={770} width={1200} height={108} rx={16}
+          fill="#FFFFFF" stroke={theme.border.light} strokeWidth={1.5}
+          style={{filter:'drop-shadow(0 4px 20px rgba(29,111,232,0.09))'}}/>
+        <rect x={360} y={770} width={5} height={108} rx={3} fill={theme.accent.blue}/>
+        {/* Icon */}
+        <circle cx={408} cy={824} r={22} fill={theme.accent.blue} opacity={0.10}/>
+        <text x={408} y={824} textAnchor="middle" dominantBaseline="middle" fontSize={22}>💡</text>
+        <text x={444} y={805} fontSize={16}
+          fontFamily="system-ui,sans-serif" fontWeight="700" fill={theme.text.primary}>
+          Definition
+        </text>
+        <text x={444} y={833} fontSize={17}
+          fontFamily="system-ui,sans-serif" fontWeight="400" fill={theme.text.secondary}>
+          An API is a
+          <tspan fontWeight="700" fill={theme.accent.blue}> defined contract </tspan>
+          that lets different software systems
+          <tspan fontWeight="700" fill={theme.accent.purple}> communicate and exchange data</tspan>.
+        </text>
+        <text x={444} y={860} fontSize={15}
+          fontFamily="system-ui,sans-serif" fill={theme.text.muted}>
+          Think of it as a menu in a restaurant — it tells you what you can order and how to ask for it.
+        </text>
+      </g>
+
+      {/* Step number badges */}
+      {f > 90 && (
+        <g opacity={interpolate(f,[90,115],[0,1],{extrapolateRight:'clamp'})}>
+          {[
+            {x:clientX+cw/2+55, y:reqY-18, n:'1', c:theme.accent.blue},
+            {x:apiX+cw/2+55,    y:reqY-18, n:'2', c:theme.accent.purple},
+            {x:serverX-cw/2-55, y:resY+18, n:'3', c:theme.accent.green},
+            {x:apiX-cw/2-55,    y:resY+18, n:'4', c:theme.accent.orange},
+          ].map((s,i)=>(
+            <g key={i}>
+              <circle cx={s.x} cy={s.y} r={14} fill={s.c} opacity={0.15}/>
+              <text x={s.x} y={s.y} textAnchor="middle" dominantBaseline="middle"
+                fontSize={12} fontFamily="system-ui" fontWeight="800" fill={s.c}>{s.n}</text>
+            </g>
+          ))}
         </g>
       )}
     </g>

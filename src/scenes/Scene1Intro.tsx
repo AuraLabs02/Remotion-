@@ -1,215 +1,230 @@
 import React from 'react';
 import {useCurrentFrame, interpolate, spring, useVideoConfig} from 'remotion';
-import {ParticleField} from '../components/ParticleField';
+import {theme} from '../theme';
 
 export const Scene1Intro: React.FC<{startFrame: number}> = ({startFrame}) => {
   const frame = useCurrentFrame();
   const {fps} = useVideoConfig();
   const f = frame - startFrame;
 
-  // Title animation
-  const titleScale = spring({frame: f - 10, fps, config: {damping: 12, stiffness: 80}});
-  const titleOpacity = interpolate(f, [10, 40], [0, 1], {extrapolateRight: 'clamp'});
+  const sceneOut = interpolate(f, [130, 160], [1, 0], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
 
-  // Subtitle slide up
-  const subtitleY = interpolate(f, [40, 70], [50, 0], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
-  const subtitleOpacity = interpolate(f, [40, 70], [0, 1], {extrapolateRight: 'clamp'});
+  const titleIn   = spring({frame: f - 8,  fps, config: {damping: 22, stiffness: 60}});
+  const subIn     = spring({frame: f - 48, fps, config: {damping: 22, stiffness: 80}});
+  const badgeIn   = spring({frame: f - 72, fps, config: {damping: 22, stiffness: 80}});
+  const tagIn     = spring({frame: f - 92, fps, config: {damping: 22, stiffness: 80}});
+  const pillsIn   = interpolate(f, [90, 120], [0, 1], {extrapolateRight: 'clamp'});
+  const nodesIn   = interpolate(f, [30, 65], [0, 1], {extrapolateRight: 'clamp'});
+  const linesIn   = interpolate(f, [70, 100], [0, 1], {extrapolateRight: 'clamp'});
 
-  // Tagline
-  const tagOpacity = interpolate(f, [70, 100], [0, 1], {extrapolateRight: 'clamp'});
+  const pulse     = Math.sin(f * 0.06) * 0.5 + 0.5;
+  const bgRotate  = f * 0.15;
+  const bgRotate2 = -f * 0.10;
 
-  // Fade out at end
-  const sceneOpacity = interpolate(f, [120, 150], [1, 0], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
+  // Corner node data
+  const nodeData = [
+    {cx: 160, cy: 195,  r: 50, color: theme.accent.blue,   label: 'CLIENT', delay: 30},
+    {cx: 1760, cy: 195, r: 50, color: theme.accent.purple, label: 'SERVER', delay: 45},
+    {cx: 160, cy: 885,  r: 50, color: theme.accent.green,  label: 'DB',     delay: 55},
+    {cx: 1760, cy: 885, r: 50, color: theme.accent.orange, label: 'API',    delay: 65},
+  ];
 
-  // Rotating ring
-  const ringRotation = f * 1.2;
-
-  // Pulse for center glow
-  const pulse = 0.5 + 0.5 * Math.sin(f * 0.1);
-  const pulse2 = 0.5 + 0.5 * Math.sin(f * 0.07 + 1);
+  // HTTP method pills at bottom
+  const pills = [
+    {x: 200,  text: 'GET',    sub: 'Retrieve data',    color: theme.accent.blue},
+    {x: 510,  text: 'POST',   sub: 'Create resource',  color: theme.accent.green},
+    {x: 820,  text: 'PUT',    sub: 'Update resource',  color: theme.accent.amber},
+    {x: 1130, text: 'DELETE', sub: 'Remove resource',  color: theme.accent.red},
+    {x: 1440, text: 'PATCH',  sub: 'Partial update',   color: theme.accent.purple},
+    {x: 1690, text: '←200',   sub: 'Success response', color: theme.accent.cyan},
+  ];
 
   return (
-    <g opacity={sceneOpacity}>
-      <ParticleField opacity={0.7} />
-
-      {/* Background gradient rings */}
+    <g opacity={sceneOut}>
       <defs>
-        <radialGradient id="bg-radial" cx="50%" cy="50%" r="60%">
-          <stop offset="0%" stopColor="#1a0a3e" stopOpacity="0.9" />
-          <stop offset="100%" stopColor="#050714" stopOpacity="0" />
+        {/* Clean white-blue gradient bg */}
+        <radialGradient id="s1-hero-bg" cx="50%" cy="45%" r="55%">
+          <stop offset="0%"   stopColor="#EEF4FF" stopOpacity="1"/>
+          <stop offset="100%" stopColor="#FFFFFF" stopOpacity="1"/>
         </radialGradient>
-        <radialGradient id="glow-center" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor="#7b2fff" stopOpacity={0.3 + 0.2 * pulse} />
-          <stop offset="100%" stopColor="#7b2fff" stopOpacity="0" />
+        {/* Soft corner glows – no blob */}
+        <radialGradient id="s1-glow-tl" cx="0%"   cy="0%"   r="55%">
+          <stop offset="0%"   stopColor={theme.accent.blue}   stopOpacity="0.07"/>
+          <stop offset="100%" stopColor={theme.accent.blue}   stopOpacity="0"/>
         </radialGradient>
-        <filter id="strong-glow">
-          <feGaussianBlur stdDeviation="8" result="blur" />
-          <feMerge>
-            <feMergeNode in="blur" />
-            <feMergeNode in="SourceGraphic" />
-          </feMerge>
-        </filter>
-        <filter id="text-glow">
-          <feGaussianBlur stdDeviation="4" result="blur" />
-          <feMerge>
-            <feMergeNode in="blur" />
-            <feMergeNode in="blur" />
-            <feMergeNode in="SourceGraphic" />
-          </feMerge>
+        <radialGradient id="s1-glow-br" cx="100%" cy="100%" r="55%">
+          <stop offset="0%"   stopColor={theme.accent.purple} stopOpacity="0.06"/>
+          <stop offset="100%" stopColor={theme.accent.purple} stopOpacity="0"/>
+        </radialGradient>
+        <linearGradient id="s1-title-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%"   stopColor={theme.accent.blue}/>
+          <stop offset="100%" stopColor={theme.accent.purple}/>
+        </linearGradient>
+        <linearGradient id="s1-line-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%"   stopColor={theme.accent.blue}   stopOpacity="0"/>
+          <stop offset="25%"  stopColor={theme.accent.blue}   stopOpacity="1"/>
+          <stop offset="75%"  stopColor={theme.accent.purple} stopOpacity="1"/>
+          <stop offset="100%" stopColor={theme.accent.purple} stopOpacity="0"/>
+        </linearGradient>
+        <pattern id="s1-dotgrid" width="48" height="48" patternUnits="userSpaceOnUse">
+          <circle cx="24" cy="24" r="1.4" fill={theme.accent.blue} opacity="0.09"/>
+        </pattern>
+        <filter id="s1-soft">
+          <feGaussianBlur stdDeviation="2"/>
         </filter>
       </defs>
 
-      {/* Center glow */}
-      <ellipse cx={960} cy={540} rx={600} ry={400} fill="url(#glow-center)" />
+      {/* BG */}
+      <rect width={1920} height={1080} fill="url(#s1-hero-bg)"/>
+      <rect width={1920} height={1080} fill="url(#s1-glow-tl)"/>
+      <rect width={1920} height={1080} fill="url(#s1-glow-br)"/>
+      <rect width={1920} height={1080} fill="url(#s1-dotgrid)"/>
 
-      {/* Animated rings */}
-      {[280, 360, 440, 520].map((r, i) => {
-        const rot = ringRotation * (i % 2 === 0 ? 1 : -1) * (0.5 + i * 0.15);
-        const opacity = 0.15 + i * 0.05 + 0.05 * Math.sin(f * 0.06 + i);
+      {/* Rotating dashed rings – centered on canvas, subtle */}
+      <g transform={`translate(960,540) rotate(${bgRotate})`} opacity={0.055}>
+        {[280,420,560,700].map((r,i)=>(
+          <circle key={i} cx={0} cy={0} r={r} fill="none"
+            stroke={i%2===0?theme.accent.blue:theme.accent.purple}
+            strokeWidth={1.5} strokeDasharray={`${16+i*6} ${12+i*4}`}/>
+        ))}
+      </g>
+      <g transform={`translate(960,540) rotate(${bgRotate2})`} opacity={0.03}>
+        {[350,490,630].map((r,i)=>(
+          <circle key={i} cx={0} cy={0} r={r} fill="none"
+            stroke={theme.accent.purple} strokeWidth={1} strokeDasharray="8 20"/>
+        ))}
+      </g>
+
+      {/* Corner nodes */}
+      {nodeData.map((nd,i)=>{
+        const ni = spring({frame: f - nd.delay, fps, config:{damping:18,stiffness:90}});
+        const floatY = Math.sin(f*0.04+i*1.2)*8;
         return (
-          <g key={i} transform={`translate(960, 540) rotate(${rot})`}>
-            <ellipse
-              cx={0}
-              cy={0}
-              rx={r}
-              ry={r * 0.35}
-              fill="none"
-              stroke={i % 2 === 0 ? '#00d4ff' : '#7b2fff'}
-              strokeWidth={1.5}
-              strokeDasharray={`${10 + i * 5} ${20 + i * 8}`}
-              opacity={opacity}
-            />
+          <g key={i} opacity={ni} transform={`translate(0,${floatY})`}>
+            <circle cx={nd.cx} cy={nd.cy} r={nd.r+18} fill={nd.color} opacity={0.07}/>
+            <circle cx={nd.cx} cy={nd.cy} r={nd.r}
+              fill="#FFFFFF" stroke={nd.color} strokeWidth={2.5}
+              style={{filter:'drop-shadow(0 4px 14px rgba(0,0,0,0.10))'}}/>
+            <text x={nd.cx} y={nd.cy} textAnchor="middle" dominantBaseline="middle"
+              fontSize={13} fontFamily="system-ui,sans-serif" fontWeight="800"
+              fill={nd.color} letterSpacing={1.5}>{nd.label}</text>
           </g>
         );
       })}
 
-      {/* Orbiting dots */}
-      {[0, 60, 120, 180, 240, 300].map((angle, i) => {
-        const a = (angle + f * (1 + i * 0.1)) * (Math.PI / 180);
-        const rx = 350;
-        const ry = 130;
-        const x = 960 + Math.cos(a) * rx;
-        const y = 540 + Math.sin(a) * ry;
-        const dotPulse = 0.5 + 0.5 * Math.sin(f * 0.1 + i);
-        return (
-          <g key={i}>
-            <circle cx={x} cy={y} r={8 * dotPulse} fill="#00d4ff" opacity={0.4 * dotPulse} />
-            <circle cx={x} cy={y} r={4} fill="#00d4ff" opacity={0.9} />
-          </g>
-        );
-      })}
+      {/* Connecting lines corner→center */}
+      <g opacity={linesIn * 0.22}>
+        {[[160,195],[1760,195],[160,885],[1760,885]].map(([x,y],i)=>(
+          <line key={i} x1={x} y1={y} x2={960} y2={540}
+            stroke={i%2===0?theme.accent.blue:theme.accent.purple}
+            strokeWidth={1} strokeDasharray="5 10"/>
+        ))}
+      </g>
 
-      {/* Main title */}
-      <g transform={`translate(960, 480) scale(${titleScale})`} opacity={titleOpacity}>
-        {/* Shadow/glow layer */}
-        <text
-          x={0}
-          y={0}
-          textAnchor="middle"
-          dominantBaseline="middle"
-          fontSize={130}
-          fontFamily="'Arial Black', Impact, sans-serif"
-          fontWeight="900"
-          fill="#00d4ff"
-          opacity={0.15 + 0.1 * pulse}
-          letterSpacing={8}
-          filter="url(#strong-glow)"
-        >
-          HOW API WORKS
+      {/* ── HERO TITLE – centered at y=510 ── */}
+      <g transform={`translate(960,510) scale(${titleIn})`} opacity={titleIn}>
+        {/* "HOW" eyebrow */}
+        <text x={0} y={-130} textAnchor="middle" dominantBaseline="middle"
+          fontSize={36} fontFamily="system-ui,sans-serif" fontWeight="700"
+          fill={theme.text.muted} letterSpacing={12}>
+          H O W
         </text>
-        {/* Main text */}
-        <text
-          x={0}
-          y={0}
-          textAnchor="middle"
-          dominantBaseline="middle"
-          fontSize={130}
-          fontFamily="'Arial Black', Impact, sans-serif"
-          fontWeight="900"
-          letterSpacing={8}
-          style={{
-            filter: 'drop-shadow(0 0 30px #00d4ff) drop-shadow(0 0 60px #7b2fff)',
-          }}
-        >
-          <tspan fill="#ffffff">HOW </tspan>
-          <tspan fill="#00d4ff">API</tspan>
-          <tspan fill="#ffffff"> WORKS</tspan>
+        {/* Giant "API" */}
+        <text x={0} y={-32} textAnchor="middle" dominantBaseline="middle"
+          fontSize={170} fontFamily="system-ui,-apple-system,sans-serif" fontWeight="900"
+          fill="url(#s1-title-grad)" letterSpacing={-6}>
+          API
+        </text>
+        {/* "WORKS" */}
+        <text x={0} y={98} textAnchor="middle" dominantBaseline="middle"
+          fontSize={70} fontFamily="system-ui,sans-serif" fontWeight="800"
+          fill={theme.text.primary} letterSpacing={22}>
+          WORKS
         </text>
       </g>
 
       {/* Animated underline */}
-      {f > 35 && (
+      {f > 20 && (
         <rect
-          x={960 - interpolate(f, [35, 60], [0, 380], {extrapolateRight: 'clamp'})}
-          y={560}
-          width={interpolate(f, [35, 60], [0, 760], {extrapolateRight: 'clamp'})}
-          height={3}
-          fill="url(#line-gradient)"
-          rx={2}
-        />
+          x={960 - interpolate(f,[20,50],[0,320],{extrapolateRight:'clamp'})}
+          y={640}
+          width={interpolate(f,[20,50],[0,640],{extrapolateRight:'clamp'})}
+          height={4} rx={2}
+          fill="url(#s1-line-grad)"/>
       )}
-      <defs>
-        <linearGradient id="line-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" stopColor="#7b2fff" />
-          <stop offset="50%" stopColor="#00d4ff" />
-          <stop offset="100%" stopColor="#7b2fff" />
-        </linearGradient>
-      </defs>
 
       {/* Subtitle */}
-      <g transform={`translate(0, ${subtitleY})`} opacity={subtitleOpacity}>
-        <text
-          x={960}
-          y={635}
-          textAnchor="middle"
-          fontSize={32}
-          fontFamily="'Arial', sans-serif"
-          fontWeight="300"
-          fill="#a0b4d0"
-          letterSpacing={8}
-        >
-          APPLICATION PROGRAMMING INTERFACE
+      <g opacity={subIn} transform={`translate(0,${(1-subIn)*28})`}>
+        <text x={960} y={692} textAnchor="middle"
+          fontSize={26} fontFamily="system-ui,sans-serif" fontWeight="400"
+          fill={theme.text.secondary} letterSpacing={3}>
+          Application Programming Interface — Explained Visually
+        </text>
+      </g>
+
+      {/* Badge */}
+      <g opacity={badgeIn} transform={`translate(0,${(1-badgeIn)*18})`}>
+        <rect x={810} y={738} width={300} height={42} rx={21}
+          fill={theme.accent.blue} opacity={0.09}/>
+        <rect x={810} y={738} width={300} height={42} rx={21}
+          fill="none" stroke={theme.accent.blue} strokeWidth={1.5} opacity={0.35}/>
+        <circle cx={840} cy={759} r={6} fill={theme.accent.green} opacity={0.9}/>
+        <text x={960} y={759} textAnchor="middle" dominantBaseline="middle"
+          fontSize={14} fontFamily="system-ui,sans-serif" fontWeight="700"
+          fill={theme.accent.blue} letterSpacing={3}>
+          PROFESSIONAL MOTION GUIDE
         </text>
       </g>
 
       {/* Tagline */}
-      <g opacity={tagOpacity}>
-        <rect x={760} y={700} width={400} height={50} rx={25} fill="none" stroke="#7b2fff" strokeWidth={1.5} opacity={0.6} />
-        <text
-          x={960}
-          y={726}
-          textAnchor="middle"
-          dominantBaseline="middle"
-          fontSize={18}
-          fontFamily="'Arial', sans-serif"
-          fontWeight="600"
-          fill="#7b2fff"
-          letterSpacing={4}
-        >
-          THE INVISIBLE SUPERPOWER
+      <g opacity={tagIn} transform={`translate(0,${(1-tagIn)*14})`}>
+        <text x={960} y={826} textAnchor="middle"
+          fontSize={17} fontFamily="system-ui,sans-serif" fontWeight="400"
+          fill={theme.text.muted} letterSpacing={2}>
+          60 Seconds · 6 Scenes · Industry-Level
         </text>
       </g>
 
-      {/* Floating code fragments */}
-      {['GET /api/data', 'POST /users', '200 OK', '{"status":"ok"}', 'REST | GraphQL', 'HTTP/2'].map((code, i) => {
-        const baseX = [200, 1600, 150, 1700, 250, 1650][i];
-        const baseY = [200, 200, 800, 800, 500, 500][i];
-        const floatY = baseY + Math.sin(f * 0.03 + i * 1.1) * 15;
-        const codeOpacity = interpolate(f, [60 + i * 10, 90 + i * 10], [0, 1], {extrapolateRight: 'clamp'}) * 0.6;
+      {/* ── HTTP Method pills row ── */}
+      <g opacity={pillsIn}>
+        {pills.map((p,i)=>{
+          const pw = 220;
+          const floatY = Math.sin(f*0.05+i*0.8)*6;
+          return (
+            <g key={i} transform={`translate(0,${floatY})`}>
+              <rect x={p.x} y={900} width={pw} height={62} rx={14}
+                fill="#FFFFFF" stroke={p.color} strokeWidth={1.5}
+                style={{filter:'drop-shadow(0 2px 10px rgba(0,0,0,0.07))'}}/>
+              <rect x={p.x} y={900} width={pw} height={5} rx={3} fill={p.color}/>
+              <text x={p.x+pw/2} y={924} textAnchor="middle"
+                fontSize={16} fontFamily="system-ui,sans-serif" fontWeight="800"
+                fill={p.color} letterSpacing={2}>{p.text}</text>
+              <text x={p.x+pw/2} y={946} textAnchor="middle"
+                fontSize={12} fontFamily="system-ui,sans-serif" fill={theme.text.muted}>{p.sub}</text>
+            </g>
+          );
+        })}
+      </g>
+
+      {/* Floating code chip decorations */}
+      {[
+        {x:310,  y:490, text:'GET /api/data',           color:theme.accent.blue,   delay:88},
+        {x:1610, y:468, text:'200 OK',                   color:theme.accent.green,  delay:95},
+        {x:270,  y:600, text:'Authorization: Bearer...', color:theme.accent.purple, delay:102},
+        {x:1590, y:595, text:'{"status":"success"}',     color:theme.accent.orange, delay:109},
+      ].map((chip,i)=>{
+        const ci = spring({frame:f-chip.delay, fps, config:{damping:20,stiffness:100}});
+        const tw = chip.text.length*7.2+28;
+        const fy = Math.sin(f*0.05+i*1.4)*7;
         return (
-          <text
-            key={i}
-            x={baseX}
-            y={floatY}
-            textAnchor="middle"
-            fontSize={14}
-            fontFamily="'Courier New', monospace"
-            fill="#00d4ff"
-            opacity={codeOpacity}
-            letterSpacing={1}
-          >
-            {code}
-          </text>
+          <g key={i} opacity={ci*0.82} transform={`translate(${chip.x-tw/2},${chip.y+fy})`}>
+            <rect x={0} y={-13} width={tw} height={26} rx={13}
+              fill="#FFFFFF" stroke={chip.color} strokeWidth={1.5}
+              style={{filter:'drop-shadow(0 2px 8px rgba(0,0,0,0.08))'}}/>
+            <text x={tw/2} y={1} textAnchor="middle" dominantBaseline="middle"
+              fontSize={11} fontFamily="'SF Mono','Fira Code',monospace" fontWeight="500"
+              fill={chip.color}>{chip.text}</text>
+          </g>
         );
       })}
     </g>
