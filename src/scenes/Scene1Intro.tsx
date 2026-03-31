@@ -1,229 +1,264 @@
 import React from 'react';
 import {useCurrentFrame, interpolate, spring, useVideoConfig} from 'remotion';
 import {theme} from '../theme';
+import {easeOutExpo, easeOutElastic, typewriter, drawPath} from '../utils';
 
 export const Scene1Intro: React.FC<{startFrame: number}> = ({startFrame}) => {
   const frame = useCurrentFrame();
   const {fps} = useVideoConfig();
   const f = frame - startFrame;
 
-  const sceneOut = interpolate(f, [130, 160], [1, 0], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
+  const sceneOut = interpolate(f, [140, 170], [1, 0], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
+  const sceneScale = interpolate(f, [140, 170], [1, 0.92], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
 
-  const titleIn   = spring({frame: f - 8,  fps, config: {damping: 22, stiffness: 60}});
-  const subIn     = spring({frame: f - 48, fps, config: {damping: 22, stiffness: 80}});
-  const badgeIn   = spring({frame: f - 72, fps, config: {damping: 22, stiffness: 80}});
-  const tagIn     = spring({frame: f - 92, fps, config: {damping: 22, stiffness: 80}});
-  const pillsIn   = interpolate(f, [90, 120], [0, 1], {extrapolateRight: 'clamp'});
-  const nodesIn   = interpolate(f, [30, 65], [0, 1], {extrapolateRight: 'clamp'});
-  const linesIn   = interpolate(f, [70, 100], [0, 1], {extrapolateRight: 'clamp'});
-
-  const pulse     = Math.sin(f * 0.06) * 0.5 + 0.5;
-  const bgRotate  = f * 0.15;
-  const bgRotate2 = -f * 0.10;
-
-  // Corner node data
-  const nodeData = [
-    {cx: 160, cy: 195,  r: 50, color: theme.accent.blue,   label: 'CLIENT', delay: 30},
-    {cx: 1760, cy: 195, r: 50, color: theme.accent.purple, label: 'SERVER', delay: 45},
-    {cx: 160, cy: 885,  r: 50, color: theme.accent.green,  label: 'DB',     delay: 55},
-    {cx: 1760, cy: 885, r: 50, color: theme.accent.orange, label: 'API',    delay: 65},
+  // --- Fragment assembly for "API" --- starts immediately at frame 0
+  const fragments = [
+    // A fragments - larger shapes
+    {finalX: 695, finalY: 460, startX: 150, startY: 120, rotation: 145, type: 'tri', color: theme.accent.blue, letter: 'A'},
+    {finalX: 735, finalY: 460, startX: 1800, startY: 200, rotation: -200, type: 'rect', color: theme.accent.blue, letter: 'A'},
+    {finalX: 715, finalY: 430, startX: 400, startY: 900, rotation: 90, type: 'circle', color: theme.accent.blue, letter: 'A'},
+    // P fragments
+    {finalX: 920, finalY: 460, startX: 960, startY: 50, rotation: 270, type: 'rect', color: theme.accent.purple, letter: 'P'},
+    {finalX: 960, finalY: 430, startX: 1600, startY: 800, rotation: -160, type: 'tri', color: theme.accent.purple, letter: 'P'},
+    {finalX: 940, finalY: 460, startX: 200, startY: 600, rotation: 180, type: 'circle', color: theme.accent.purple, letter: 'P'},
+    // I fragments
+    {finalX: 1170, finalY: 460, startX: 1700, startY: 950, rotation: -300, type: 'rect', color: theme.accent.cyan, letter: 'I'},
+    {finalX: 1190, finalY: 430, startX: 100, startY: 400, rotation: 220, type: 'tri', color: theme.accent.cyan, letter: 'I'},
+    {finalX: 1180, finalY: 460, startX: 1400, startY: 100, rotation: -120, type: 'circle', color: theme.accent.cyan, letter: 'I'},
   ];
 
-  // HTTP method pills at bottom
-  const pills = [
-    {x: 200,  text: 'GET',    sub: 'Retrieve data',    color: theme.accent.blue},
-    {x: 510,  text: 'POST',   sub: 'Create resource',  color: theme.accent.green},
-    {x: 820,  text: 'PUT',    sub: 'Update resource',  color: theme.accent.amber},
-    {x: 1130, text: 'DELETE', sub: 'Remove resource',  color: theme.accent.red},
-    {x: 1440, text: 'PATCH',  sub: 'Partial update',   color: theme.accent.purple},
-    {x: 1690, text: '←200',   sub: 'Success response', color: theme.accent.cyan},
+  // Fragment assembly (f=0-30) - starts IMMEDIATELY
+  const fragmentProgress = fragments.map((frag, i) => {
+    const delay = i * 1.5; // faster stagger
+    const s = spring({frame: f - delay, fps, config: {damping: 12, stiffness: 90}});
+    return s;
+  });
+
+  // Title text appears (f=15-35) - earlier
+  const titleIn = spring({frame: f - 15, fps, config: {damping: 16, stiffness: 70}});
+
+  // "HOW" and "WORKS" clip-path reveal (f=22-52) - earlier
+  const howReveal = interpolate(f, [22, 45], [0, 1], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
+  const worksReveal = interpolate(f, [28, 52], [0, 1], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
+
+  // Circuit paths draw-on (f=5-55) - start earlier
+  const circuitPaths = [
+    {d: 'M 0,300 Q 400,280 700,400', len: 780, delay: 5},
+    {d: 'M 1920,350 Q 1500,320 1220,420', len: 780, delay: 10},
+    {d: 'M 300,1080 Q 500,750 700,540', len: 620, delay: 15},
+    {d: 'M 1620,1080 Q 1400,750 1220,540', len: 620, delay: 20},
+    {d: 'M 0,600 Q 350,550 650,480', len: 700, delay: 25},
+    {d: 'M 1920,620 Q 1550,560 1260,490', len: 720, delay: 30},
+  ];
+
+  // Subtitle typewriter (f=55-95) - earlier
+  const subtitleText = 'Application Programming Interface — Explained Visually';
+  const subtitleChars = typewriter(f, 55, subtitleText, 1.2);
+
+  // Badge entrance (f=80-100) - earlier
+  const badgeIn = spring({frame: f - 80, fps, config: {damping: 10, stiffness: 100}});
+
+  // HTTP method orbit (f=65-130) - earlier and wider
+  const methods = [
+    {name: 'GET', desc: 'Read', color: theme.accent.blue},
+    {name: 'POST', desc: 'Create', color: theme.accent.green},
+    {name: 'PUT', desc: 'Update', color: theme.accent.amber},
+    {name: 'DELETE', desc: 'Remove', color: theme.accent.red},
+  ];
+  const orbitIn = interpolate(f, [65, 88], [0, 1], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
+  const orbitAngle = f * 0.015;
+
+  // Network node positions for background
+  const bgNodes = [
+    {x: 180, y: 240, delay: 55},
+    {x: 1740, y: 260, delay: 60},
+    {x: 180, y: 840, delay: 65},
+    {x: 1740, y: 820, delay: 70},
+    {x: 960, y: 180, delay: 75},
   ];
 
   return (
-    <g opacity={sceneOut}>
+    <g opacity={sceneOut} transform={`translate(960,540) scale(${sceneScale}) translate(-960,-540)`}>
       <defs>
-        {/* Clean white-blue gradient bg */}
-        <radialGradient id="s1-hero-bg" cx="50%" cy="45%" r="55%">
-          <stop offset="0%"   stopColor="#EEF4FF" stopOpacity="1"/>
-          <stop offset="100%" stopColor="#FFFFFF" stopOpacity="1"/>
-        </radialGradient>
-        {/* Soft corner glows – no blob */}
-        <radialGradient id="s1-glow-tl" cx="0%"   cy="0%"   r="55%">
-          <stop offset="0%"   stopColor={theme.accent.blue}   stopOpacity="0.07"/>
-          <stop offset="100%" stopColor={theme.accent.blue}   stopOpacity="0"/>
-        </radialGradient>
-        <radialGradient id="s1-glow-br" cx="100%" cy="100%" r="55%">
-          <stop offset="0%"   stopColor={theme.accent.purple} stopOpacity="0.06"/>
-          <stop offset="100%" stopColor={theme.accent.purple} stopOpacity="0"/>
+        <radialGradient id="s1-bg" cx="50%" cy="42%" r="60%">
+          <stop offset="0%" stopColor="#EEF4FF" stopOpacity="1" />
+          <stop offset="100%" stopColor="#FFFFFF" stopOpacity="1" />
         </radialGradient>
         <linearGradient id="s1-title-grad" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%"   stopColor={theme.accent.blue}/>
-          <stop offset="100%" stopColor={theme.accent.purple}/>
+          <stop offset="0%" stopColor={theme.accent.blue} />
+          <stop offset="50%" stopColor={theme.accent.purple} />
+          <stop offset="100%" stopColor={theme.accent.cyan} />
         </linearGradient>
         <linearGradient id="s1-line-grad" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%"   stopColor={theme.accent.blue}   stopOpacity="0"/>
-          <stop offset="25%"  stopColor={theme.accent.blue}   stopOpacity="1"/>
-          <stop offset="75%"  stopColor={theme.accent.purple} stopOpacity="1"/>
-          <stop offset="100%" stopColor={theme.accent.purple} stopOpacity="0"/>
+          <stop offset="0%" stopColor={theme.accent.blue} stopOpacity="0" />
+          <stop offset="20%" stopColor={theme.accent.blue} stopOpacity="1" />
+          <stop offset="80%" stopColor={theme.accent.purple} stopOpacity="1" />
+          <stop offset="100%" stopColor={theme.accent.purple} stopOpacity="0" />
         </linearGradient>
-        <pattern id="s1-dotgrid" width="48" height="48" patternUnits="userSpaceOnUse">
-          <circle cx="24" cy="24" r="1.4" fill={theme.accent.blue} opacity="0.09"/>
+        <clipPath id="s1-how-clip">
+          <rect x={960 - howReveal * 200} y={290} width={howReveal * 400} height={60} />
+        </clipPath>
+        <clipPath id="s1-works-clip">
+          <rect x={960 - worksReveal * 280} y={530} width={worksReveal * 560} height={100} />
+        </clipPath>
+        <pattern id="s1-dotgrid" width="52" height="52" patternUnits="userSpaceOnUse">
+          <circle cx="26" cy="26" r="1.5" fill={theme.accent.blue} opacity="0.07" />
         </pattern>
-        <filter id="s1-soft">
-          <feGaussianBlur stdDeviation="2"/>
-        </filter>
       </defs>
 
-      {/* BG */}
-      <rect width={1920} height={1080} fill="url(#s1-hero-bg)"/>
-      <rect width={1920} height={1080} fill="url(#s1-glow-tl)"/>
-      <rect width={1920} height={1080} fill="url(#s1-glow-br)"/>
-      <rect width={1920} height={1080} fill="url(#s1-dotgrid)"/>
+      {/* Background */}
+      <rect width={1920} height={1080} fill="url(#s1-bg)" />
+      <rect width={1920} height={1080} fill="url(#s1-dotgrid)" />
 
-      {/* Rotating dashed rings – centered on canvas, subtle */}
-      <g transform={`translate(960,540) rotate(${bgRotate})`} opacity={0.055}>
-        {[280,420,560,700].map((r,i)=>(
-          <circle key={i} cx={0} cy={0} r={r} fill="none"
-            stroke={i%2===0?theme.accent.blue:theme.accent.purple}
-            strokeWidth={1.5} strokeDasharray={`${16+i*6} ${12+i*4}`}/>
-        ))}
-      </g>
-      <g transform={`translate(960,540) rotate(${bgRotate2})`} opacity={0.03}>
-        {[350,490,630].map((r,i)=>(
-          <circle key={i} cx={0} cy={0} r={r} fill="none"
-            stroke={theme.accent.purple} strokeWidth={1} strokeDasharray="8 20"/>
-        ))}
-      </g>
-
-      {/* Corner nodes */}
-      {nodeData.map((nd,i)=>{
-        const ni = spring({frame: f - nd.delay, fps, config:{damping:18,stiffness:90}});
-        const floatY = Math.sin(f*0.04+i*1.2)*8;
+      {/* Circuit path traces */}
+      {circuitPaths.map((cp, i) => {
+        const prog = drawPath(f, cp.delay, 35, easeOutExpo);
+        const dashOff = cp.len * (1 - prog);
         return (
-          <g key={i} opacity={ni} transform={`translate(0,${floatY})`}>
-            <circle cx={nd.cx} cy={nd.cy} r={nd.r+18} fill={nd.color} opacity={0.07}/>
-            <circle cx={nd.cx} cy={nd.cy} r={nd.r}
-              fill="#FFFFFF" stroke={nd.color} strokeWidth={2.5}
-              style={{filter:'drop-shadow(0 4px 14px rgba(0,0,0,0.10))'}}/>
-            <text x={nd.cx} y={nd.cy} textAnchor="middle" dominantBaseline="middle"
-              fontSize={13} fontFamily="system-ui,sans-serif" fontWeight="800"
-              fill={nd.color} letterSpacing={1.5}>{nd.label}</text>
+          <g key={i}>
+            <path d={cp.d} fill="none" stroke={i % 2 === 0 ? theme.accent.blue : theme.accent.purple}
+              strokeWidth={2} opacity={0.18} strokeDasharray={cp.len} strokeDashoffset={dashOff}
+              strokeLinecap="round" />
+            {/* Glow on path */}
+            <path d={cp.d} fill="none" stroke={i % 2 === 0 ? theme.accent.blue : theme.accent.purple}
+              strokeWidth={8} opacity={0.07 * prog} strokeDasharray={cp.len} strokeDashoffset={dashOff}
+              strokeLinecap="round" style={{filter: 'blur(5px)'}} />
           </g>
         );
       })}
 
-      {/* Connecting lines corner→center */}
-      <g opacity={linesIn * 0.22}>
-        {[[160,195],[1760,195],[160,885],[1760,885]].map(([x,y],i)=>(
-          <line key={i} x1={x} y1={y} x2={960} y2={540}
-            stroke={i%2===0?theme.accent.blue:theme.accent.purple}
-            strokeWidth={1} strokeDasharray="5 10"/>
-        ))}
-      </g>
+      {/* Background network nodes */}
+      {bgNodes.map((node, i) => {
+        const ni = spring({frame: f - node.delay, fps, config: {damping: 18, stiffness: 90}});
+        const p = Math.sin(f * 0.05 + i) * 0.3 + 0.7;
+        return (
+          <g key={i} opacity={ni * 0.25}>
+            <circle cx={node.x} cy={node.y} r={18} fill="none"
+              stroke={i % 2 === 0 ? theme.accent.blue : theme.accent.purple}
+              strokeWidth={1.5} opacity={p} />
+            <circle cx={node.x} cy={node.y} r={5}
+              fill={i % 2 === 0 ? theme.accent.blue : theme.accent.purple} opacity={0.5} />
+          </g>
+        );
+      })}
 
-      {/* ── HERO TITLE – centered at y=510 ── */}
-      <g transform={`translate(960,510) scale(${titleIn})`} opacity={titleIn}>
-        {/* "HOW" eyebrow */}
-        <text x={0} y={-130} textAnchor="middle" dominantBaseline="middle"
-          fontSize={36} fontFamily="system-ui,sans-serif" fontWeight="700"
-          fill={theme.text.muted} letterSpacing={12}>
-          H O W
-        </text>
-        {/* Giant "API" */}
-        <text x={0} y={-32} textAnchor="middle" dominantBaseline="middle"
-          fontSize={170} fontFamily="system-ui,-apple-system,sans-serif" fontWeight="900"
-          fill="url(#s1-title-grad)" letterSpacing={-6}>
+      {/* Connecting lines from bg nodes to center */}
+      {bgNodes.map((node, i) => {
+        const lineIn = interpolate(f, [node.delay + 10, node.delay + 30], [0, 1], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
+        return (
+          <line key={i} x1={node.x} y1={node.y} x2={960} y2={460}
+            stroke={i % 2 === 0 ? theme.accent.blue : theme.accent.purple}
+            strokeWidth={1} strokeDasharray="6 12" opacity={lineIn * 0.12} />
+        );
+      })}
+
+      {/* Geometric fragments assembling */}
+      {fragments.map((frag, i) => {
+        const p = fragmentProgress[i];
+        const x = frag.startX + (frag.finalX - frag.startX) * p;
+        const y = frag.startY + (frag.finalY - frag.startY) * p;
+        const rot = frag.rotation * (1 - p);
+        const fadeOut = interpolate(f, [28, 42], [1, 0], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
+        return (
+          <g key={i} opacity={p * fadeOut * 0.6} transform={`translate(${x},${y}) rotate(${rot})`}>
+            {frag.type === 'tri' && (
+              <polygon points="0,-18 16,14 -16,14" fill={frag.color} />
+            )}
+            {frag.type === 'rect' && (
+              <rect x={-12} y={-12} width={24} height={24} rx={4} fill={frag.color} />
+            )}
+            {frag.type === 'circle' && (
+              <circle r={12} fill={frag.color} />
+            )}
+          </g>
+        );
+      })}
+
+      {/* Main "API" title */}
+      <g opacity={titleIn} transform={`translate(960,460) scale(${0.7 + 0.3 * titleIn})`}>
+        <text x={0} y={0} textAnchor="middle" dominantBaseline="middle"
+          fontSize={200} fontFamily={theme.font.display} fontWeight="900"
+          fill="url(#s1-title-grad)" letterSpacing={-4}
+          style={{filter: 'drop-shadow(0 4px 20px rgba(29,111,232,0.18))'}}>
           API
         </text>
-        {/* "WORKS" */}
-        <text x={0} y={98} textAnchor="middle" dominantBaseline="middle"
-          fontSize={70} fontFamily="system-ui,sans-serif" fontWeight="800"
-          fill={theme.text.primary} letterSpacing={22}>
+      </g>
+
+      {/* "HOW" - clip reveal - larger and darker */}
+      <g clipPath="url(#s1-how-clip)">
+        <text x={960} y={325} textAnchor="middle" dominantBaseline="middle"
+          fontSize={48} fontFamily={theme.font.display} fontWeight="800"
+          fill={theme.text.secondary} letterSpacing={16}>
+          H O W
+        </text>
+      </g>
+
+      {/* "WORKS" - clip reveal */}
+      <g clipPath="url(#s1-works-clip)">
+        <text x={960} y={588} textAnchor="middle" dominantBaseline="middle"
+          fontSize={80} fontFamily={theme.font.display} fontWeight="800"
+          fill={theme.text.primary} letterSpacing={18}>
           WORKS
         </text>
       </g>
 
-      {/* Animated underline */}
-      {f > 20 && (
+      {/* Animated gradient underline */}
+      {f > 28 && (
         <rect
-          x={960 - interpolate(f,[20,50],[0,320],{extrapolateRight:'clamp'})}
-          y={640}
-          width={interpolate(f,[20,50],[0,640],{extrapolateRight:'clamp'})}
-          height={4} rx={2}
-          fill="url(#s1-line-grad)"/>
+          x={960 - interpolate(f, [28, 52], [0, 400], {extrapolateRight: 'clamp'})}
+          y={638}
+          width={interpolate(f, [28, 52], [0, 800], {extrapolateRight: 'clamp'})}
+          height={4} rx={2} fill="url(#s1-line-grad)" />
       )}
 
-      {/* Subtitle */}
-      <g opacity={subIn} transform={`translate(0,${(1-subIn)*28})`}>
-        <text x={960} y={692} textAnchor="middle"
-          fontSize={26} fontFamily="system-ui,sans-serif" fontWeight="400"
-          fill={theme.text.secondary} letterSpacing={3}>
-          Application Programming Interface — Explained Visually
+      {/* Subtitle - typewriter */}
+      <g opacity={interpolate(f, [55, 65], [0, 1], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'})}>
+        <text x={960} y={685} textAnchor="middle"
+          fontSize={28} fontFamily={theme.font.body} fontWeight="400"
+          fill={theme.text.secondary} letterSpacing={2}>
+          {subtitleText.slice(0, subtitleChars)}
         </text>
+        {/* Blinking cursor */}
+        {subtitleChars < subtitleText.length && Math.sin(f * 0.15) > 0 && (
+          <rect
+            x={960 + (subtitleChars - subtitleText.length / 2) * 14.5}
+            y={670} width={2} height={28} rx={1} fill={theme.accent.blue} />
+        )}
       </g>
 
       {/* Badge */}
-      <g opacity={badgeIn} transform={`translate(0,${(1-badgeIn)*18})`}>
-        <rect x={810} y={738} width={300} height={42} rx={21}
-          fill={theme.accent.blue} opacity={0.09}/>
-        <rect x={810} y={738} width={300} height={42} rx={21}
-          fill="none" stroke={theme.accent.blue} strokeWidth={1.5} opacity={0.35}/>
-        <circle cx={840} cy={759} r={6} fill={theme.accent.green} opacity={0.9}/>
-        <text x={960} y={759} textAnchor="middle" dominantBaseline="middle"
-          fontSize={14} fontFamily="system-ui,sans-serif" fontWeight="700"
+      <g opacity={badgeIn} transform={`translate(960,${738 + (1 - badgeIn) * 30}) scale(${0.8 + 0.2 * badgeIn})`}>
+        <rect x={-175} y={-22} width={350} height={44} rx={22}
+          fill={theme.accent.blue} opacity={0.08} />
+        <rect x={-175} y={-22} width={350} height={44} rx={22}
+          fill="none" stroke={theme.accent.blue} strokeWidth={1.5} opacity={0.30} />
+        <circle cx={-148} cy={0} r={6} fill={theme.accent.green} opacity={0.9} />
+        <text x={0} y={0} textAnchor="middle" dominantBaseline="middle"
+          fontSize={15} fontFamily={theme.font.body} fontWeight="700"
           fill={theme.accent.blue} letterSpacing={3}>
           PROFESSIONAL MOTION GUIDE
         </text>
       </g>
 
-      {/* Tagline */}
-      <g opacity={tagIn} transform={`translate(0,${(1-tagIn)*14})`}>
-        <text x={960} y={826} textAnchor="middle"
-          fontSize={17} fontFamily="system-ui,sans-serif" fontWeight="400"
-          fill={theme.text.muted} letterSpacing={2}>
-          60 Seconds · 6 Scenes · Industry-Level
-        </text>
-      </g>
-
-      {/* ── HTTP Method pills row ── */}
-      <g opacity={pillsIn}>
-        {pills.map((p,i)=>{
-          const pw = 220;
-          const floatY = Math.sin(f*0.05+i*0.8)*6;
-          return (
-            <g key={i} transform={`translate(0,${floatY})`}>
-              <rect x={p.x} y={900} width={pw} height={62} rx={14}
-                fill="#FFFFFF" stroke={p.color} strokeWidth={1.5}
-                style={{filter:'drop-shadow(0 2px 10px rgba(0,0,0,0.07))'}}/>
-              <rect x={p.x} y={900} width={pw} height={5} rx={3} fill={p.color}/>
-              <text x={p.x+pw/2} y={924} textAnchor="middle"
-                fontSize={16} fontFamily="system-ui,sans-serif" fontWeight="800"
-                fill={p.color} letterSpacing={2}>{p.text}</text>
-              <text x={p.x+pw/2} y={946} textAnchor="middle"
-                fontSize={12} fontFamily="system-ui,sans-serif" fill={theme.text.muted}>{p.sub}</text>
-            </g>
-          );
-        })}
-      </g>
-
-      {/* Floating code chip decorations */}
-      {[
-        {x:310,  y:490, text:'GET /api/data',           color:theme.accent.blue,   delay:88},
-        {x:1610, y:468, text:'200 OK',                   color:theme.accent.green,  delay:95},
-        {x:270,  y:600, text:'Authorization: Bearer...', color:theme.accent.purple, delay:102},
-        {x:1590, y:595, text:'{"status":"success"}',     color:theme.accent.orange, delay:109},
-      ].map((chip,i)=>{
-        const ci = spring({frame:f-chip.delay, fps, config:{damping:20,stiffness:100}});
-        const tw = chip.text.length*7.2+28;
-        const fy = Math.sin(f*0.05+i*1.4)*7;
+      {/* HTTP Methods - orbital */}
+      {methods.map((method, i) => {
+        const angle = orbitAngle + (i * Math.PI * 2) / methods.length;
+        const rx = 400, ry = 145;
+        const mx = 960 + Math.cos(angle) * rx;
+        const my = 460 + Math.sin(angle) * ry;
+        const methodScale = spring({frame: f - (68 + i * 8), fps, config: {damping: 12, stiffness: 100}});
+        const zOrder = Math.sin(angle);
+        const size = 0.7 + 0.3 * (zOrder * 0.5 + 0.5);
         return (
-          <g key={i} opacity={ci*0.82} transform={`translate(${chip.x-tw/2},${chip.y+fy})`}>
-            <rect x={0} y={-13} width={tw} height={26} rx={13}
-              fill="#FFFFFF" stroke={chip.color} strokeWidth={1.5}
-              style={{filter:'drop-shadow(0 2px 8px rgba(0,0,0,0.08))'}}/>
-            <text x={tw/2} y={1} textAnchor="middle" dominantBaseline="middle"
-              fontSize={11} fontFamily="'SF Mono','Fira Code',monospace" fontWeight="500"
-              fill={chip.color}>{chip.text}</text>
+          <g key={i} opacity={orbitIn * methodScale * (0.5 + 0.5 * (zOrder * 0.5 + 0.5))}
+            transform={`translate(${mx},${my}) scale(${size * methodScale})`}>
+            <circle r={50} fill="#FFFFFF" stroke={method.color} strokeWidth={2.5}
+              style={{filter: 'drop-shadow(0 3px 12px rgba(0,0,0,0.10))'}} />
+            <text x={0} y={-6} textAnchor="middle" dominantBaseline="middle"
+              fontSize={18} fontFamily={theme.font.body} fontWeight="800"
+              fill={method.color} letterSpacing={1}>{method.name}</text>
+            <text x={0} y={18} textAnchor="middle" dominantBaseline="middle"
+              fontSize={14} fontFamily={theme.font.body} fill={theme.text.muted}>{method.desc}</text>
           </g>
         );
       })}

@@ -36,4 +36,21 @@ export const theme = {
     blue: '0 8px 32px rgba(29,111,232,0.20)',
     purple: '0 8px 32px rgba(124,58,237,0.20)',
   },
+  // Font size system - minimum sizes for readability
+  fontSize: {
+    hero: 170,
+    heading: 72,
+    title: 64,
+    subtitle: 32,
+    body: 20,
+    label: 16,
+    code: 15,
+    small: 13,
+  },
+  // Font families
+  font: {
+    display: 'system-ui,-apple-system,sans-serif',
+    body: 'system-ui,sans-serif',
+    mono: "'SF Mono','Fira Code','Consolas',monospace",
+  },
 };
