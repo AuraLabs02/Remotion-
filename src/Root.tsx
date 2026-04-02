@@ -1,14 +1,13 @@
-import React from 'react';
-import {Composition} from 'remotion';
-import {APIVideo} from './APIVideo';
+import { Composition } from 'remotion';
+import { PromptEngineering } from './PromptEngineering';
 
 export const RemotionRoot: React.FC = () => {
   return (
     <>
       <Composition
-        id="APIVideo"
-        component={APIVideo}
-        durationInFrames={1800} // 60 seconds at 30fps
+        id="PromptEngineering"
+        component={PromptEngineering}
+        durationInFrames={5400}
         fps={30}
         width={1920}
         height={1080}

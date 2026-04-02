@@ -5,9 +5,9 @@
   "main": "index.js",
   "scripts": {
     "start": "remotion studio src/index.ts",
-    "build": "remotion render src/index.ts APIVideo out/api-video.mp4",
-    "render": "remotion render src/index.ts APIVideo out/api-video.mp4",
-    "preview": "remotion still src/index.ts APIVideo --frame=0 out/preview.png"
+    "build": "remotion render src/index.ts PromptEngineering out/prompt-engineering.mp4",
+    "render": "remotion render src/index.ts PromptEngineering out/prompt-engineering.mp4",
+    "preview": "remotion still src/index.ts PromptEngineering --frame=0 out/preview.png"
   },
   "repository": {
     "type": "git",
