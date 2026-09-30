@@ -1,5 +1,6 @@
 import React from 'react';
 import {BRAND, CHANNEL, TIERS, SELECTED_TIER, VIEWER} from '../config/channel';
+import {alpha, mixHex} from '../config/palette';
 import {clamp, EASE, lerp} from '../lib/motion';
 import {FONT, YT} from '../theme/tokens';
 import {REAL} from './assets';
@@ -22,7 +23,7 @@ export const PaymentCard: React.FC<{w?: number; sheen?: number}> = ({w = 360, sh
         borderRadius: 16 * k,
         position: 'relative',
         overflow: 'hidden',
-        background: `radial-gradient(circle at 85% 15%, rgba(236,72,153,0.55) 0%, rgba(236,72,153,0) 45%), linear-gradient(135deg, #0b1130 0%, #1d2a78 45%, #4b2aa8 100%)`,
+        background: `radial-gradient(circle at 85% 15%, ${alpha(BRAND.pink, 0.55)} 0%, ${alpha(BRAND.pink, 0)} 45%), linear-gradient(135deg, ${BRAND.night} 0%, ${mixHex(BRAND.blue, '#05060d', 0.6)} 45%, ${mixHex(BRAND.violet, '#05060d', 0.4)} 100%)`,
         boxShadow: `0 ${24 * k}px ${50 * k}px rgba(0,0,0,0.5), inset 0 0 0 ${1 * k}px rgba(255,255,255,0.18)`,
         fontFamily: FONT.mono,
         color: '#fff',
@@ -38,7 +39,7 @@ export const PaymentCard: React.FC<{w?: number; sheen?: number}> = ({w = 360, sh
       />
       {REAL.avatar ? null : (
         <div style={{position: 'absolute', right: -40 * k, bottom: -46 * k, opacity: 0.22}}>
-          <CloudCodesMark size={220 * k} id="cardmark" glyph="#1d2a78" />
+          <CloudCodesMark size={220 * k} id="cardmark" glyph={mixHex(BRAND.blue, '#05060d', 0.6)} />
         </div>
       )}
       <div
@@ -55,7 +56,7 @@ export const PaymentCard: React.FC<{w?: number; sheen?: number}> = ({w = 360, sh
           gap: 8 * k,
         }}
       >
-        <BrandMark size={30 * k} id="cardlogo" glyph="#0b1130" />
+        <BrandMark size={30 * k} id="cardlogo" glyph={BRAND.night} />
         {CHANNEL.name}
       </div>
       <div

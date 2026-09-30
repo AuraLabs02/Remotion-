@@ -33,9 +33,19 @@ npm run render   # → out/cloud-codes-membership-reel.mp4
 
 Remotion downloads its own headless Chrome on first render. To use an existing Chrome or Chromium instead, set `REMOTION_BROWSER_EXECUTABLE=/path/to/chrome`.
 
-## Use the channel's real artwork
+## Use the channel's real branding
 
-The render ships with vector stand-ins for the logo, banner and thumbnails. Drop the real files into `public/brand/` and render again. They are picked up automatically; no code changes are needed.
+The reel ships with vector stand-ins for the logo, banner and thumbnails. There are two ways to swap in the real ones. Either way, the whole reel re-themes from the logo's colours: glows, gradients, badges, the payment card and the backgrounds.
+
+**Option A: fetch everything automatically.** This needs access to `youtube.com`, `yt3.googleusercontent.com`, `yt3.ggpht.com` and `i.ytimg.com`.
+
+```bash
+pip install pillow
+npm run fetch-brand      # logo, banner, latest thumbnails, titles, views, durations, subscriber count, colours
+npm run render
+```
+
+**Option B: drop the files in yourself**, then extract the colours from the logo:
 
 | File | Used for |
 | --- | --- |
@@ -44,7 +54,12 @@ The render ships with vector stand-ins for the logo, banner and thumbnails. Drop
 | `public/brand/thumb-1.jpg` … `thumb-8.jpg` | Video grid thumbnails, in the order of `VIDEOS` |
 | `public/brand/members-1.jpg` … `members-3.jpg` | Members-only shelf thumbnails |
 
-Everything else, including titles, view counts, subscriber count, membership levels, prices, perks, chat messages and brand colours, lives in [`src/config/channel.ts`](src/config/channel.ts).
+```bash
+npm run brand-colors     # writes the palette to src/config/live.json
+npm run render
+```
+
+Fetched data lands in [`src/config/live.json`](src/config/live.json) and overrides the defaults in [`src/config/channel.ts`](src/config/channel.ts). Anything else, including membership levels, prices, perks and chat messages, is edited in `channel.ts`.
 
 ## Regenerate the audio
 

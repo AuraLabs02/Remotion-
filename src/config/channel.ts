@@ -1,11 +1,24 @@
 // Channel data shown in the reel. Edit freely: every screen reads from here.
 //
-// Real artwork: drop files into public/brand/ and they replace the built-in
-// stand-ins automatically (see src/ui/assets.ts):
-//   public/brand/avatar.png   channel logo (square, ≥ 800px)
-//   public/brand/banner.jpg   channel banner (2560×423 safe area crop)
-//   public/brand/thumb-1.jpg … thumb-8.jpg   video thumbnails (16:9)
-//   public/brand/members-1.jpg … members-3.jpg   members-only thumbnails
+// Real branding, two ways (both picked up automatically on the next render):
+//  1. `npm run fetch-brand` (needs access to youtube.com) downloads the real
+//     logo, banner, latest thumbnails, titles and stats, and extracts the
+//     brand colours from the logo into src/config/live.json.
+//  2. Or drop files into public/brand/ yourself:
+//       avatar.png (logo) · banner.jpg · thumb-1.jpg … thumb-8.jpg · members-1.jpg … members-3.jpg
+//     then run `npm run brand-colors` to re-theme the reel from the logo.
+
+import liveJson from './live.json';
+import {DEFAULT_PALETTE, paletteFrom} from './palette';
+
+type LiveData = {
+  channel?: Partial<typeof CHANNEL_DEFAULTS>;
+  palette?: string[];
+  videos?: {title: string; views: string; age: string; duration?: string}[];
+  fetchedAt?: string;
+};
+
+const LIVE = liveJson as LiveData;
 
 export type ThumbIcon =
   | 'gauge'
@@ -36,7 +49,7 @@ export type Video = {
   art: ThumbArt;
 };
 
-export const CHANNEL = {
+const CHANNEL_DEFAULTS = {
   name: 'Cloud Codes',
   handle: '@Cloud-Codes',
   url: 'youtube.com/@Cloud-Codes',
@@ -49,20 +62,10 @@ export const CHANNEL = {
   tagline: 'Cloud · AI Automation · DevOps',
 };
 
-/** Stand-in brand palette (swap for the channel's exact colours). */
-export const BRAND = {
-  cyan: '#22d3ee',
-  sky: '#38bdf8',
-  blue: '#3b82f6',
-  indigo: '#6366f1',
-  violet: '#8b5cf6',
-  pink: '#ec4899',
-  deep: '#070b1d',
-  night: '#0b1130',
-  gradient: 'linear-gradient(135deg, #22d3ee 0%, #3b82f6 48%, #8b5cf6 100%)',
-  gradientSoft:
-    'linear-gradient(135deg, rgba(34,211,238,0.9) 0%, rgba(59,130,246,0.9) 50%, rgba(139,92,246,0.9) 100%)',
-};
+export const CHANNEL = {...CHANNEL_DEFAULTS, ...(LIVE.channel ?? {})};
+
+/** Brand palette: extracted from the real logo when available, else the stand-in. */
+export const BRAND = LIVE.palette && LIVE.palette.length >= 2 ? paletteFrom(LIVE.palette) : DEFAULT_PALETTE;
 
 export const VIEWER = {
   name: 'Alex Carter',
@@ -119,7 +122,7 @@ export const PERKS = [
   {icon: 'bolt', title: 'Early access', text: 'watch new uploads before everyone else'},
 ] as const;
 
-export const VIDEOS: Video[] = [
+const DEFAULT_VIDEOS: Video[] = [
   {
     title: 'Qwen3.8 27B Is 3× Faster With One Hidden Setting (MTP)',
     duration: '14:32',
@@ -177,6 +180,15 @@ export const VIDEOS: Video[] = [
     art: {big: 'IaC', small: 'WITH AI', tag: 'TERRAFORM', icon: 'terminal', accent: '#b98cff', base: '#150a2b'},
   },
 ];
+
+/** Real titles/stats (from live.json) on top of the stand-in thumbnail art. */
+export const VIDEOS: Video[] =
+  LIVE.videos && LIVE.videos.length
+    ? DEFAULT_VIDEOS.map((d, i) => {
+        const v = LIVE.videos![i];
+        return v ? {...d, title: v.title, views: v.views, age: v.age, duration: v.duration ?? d.duration} : d;
+      })
+    : DEFAULT_VIDEOS;
 
 export const MEMBER_VIDEOS: Video[] = [
   {

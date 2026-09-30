@@ -1,6 +1,7 @@
 import React from 'react';
 import {random} from 'remotion';
 import {BRAND} from '../config/channel';
+import {alpha} from '../config/palette';
 import {clamp, EASE} from '../lib/motion';
 
 const CONFETTI_COLORS = [BRAND.cyan, BRAND.blue, BRAND.violet, BRAND.pink, '#ffffff', '#fbbf24', '#ff3b3b'];
@@ -116,7 +117,7 @@ export const Rays: React.FC<{frame: number; x: number; y: number; size?: number;
   y,
   size = 2200,
   opacity = 1,
-  color = 'rgba(120,160,255,0.35)',
+  color = alpha(BRAND.light, 0.35),
   count = 18,
 }) => {
   const step = 360 / count;

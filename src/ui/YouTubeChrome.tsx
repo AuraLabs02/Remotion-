@@ -1,5 +1,6 @@
 import React from 'react';
-import {SUBSCRIPTIONS, VIEWER} from '../config/channel';
+import {BRAND, SUBSCRIPTIONS, VIEWER} from '../config/channel';
+import {alpha} from '../config/palette';
 import {FONT, YT} from '../theme/tokens';
 import {ChannelAvatar, LetterAvatar, YouTubeIcon, YouTubeLogo} from './Brand';
 import {IconButton} from './Button';
@@ -223,7 +224,7 @@ export const BrowserFrame: React.FC<{url: string; title: string; children: React
       overflow: 'hidden',
       background: '#1b1b1f',
       position: 'relative',
-      boxShadow: `0 60px 120px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.09), 0 0 ${80 * glow}px rgba(59,130,246,${0.35 * glow})`,
+      boxShadow: `0 60px 120px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.09), 0 0 ${80 * glow}px ${alpha(BRAND.blue, 0.35 * glow)}`,
     }}
   >
     <div

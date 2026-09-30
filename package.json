@@ -8,7 +8,9 @@
     "audio": "node scripts/export-cues.mjs && python3 scripts/generate_audio.py",
     "render": "remotion render src/index.ts MembershipReel out/cloud-codes-membership-reel.mp4",
     "still": "remotion still src/index.ts MembershipReel out/still.png",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "fetch-brand": "python3 scripts/fetch_brand.py",
+    "brand-colors": "python3 scripts/fetch_brand.py --colors-only"
   },
   "dependencies": {
     "@remotion/cli": "4.0.530",

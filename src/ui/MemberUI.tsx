@@ -1,5 +1,6 @@
 import React from 'react';
 import {BRAND, CHANNEL, CHAT, MEMBER_VIDEOS, PERKS, TIERS, SELECTED_TIER, VIEWER} from '../config/channel';
+import {alpha} from '../config/palette';
 import {clamp, EASE} from '../lib/motion';
 import {FONT, YT} from '../theme/tokens';
 import {REAL} from './assets';
@@ -445,7 +446,7 @@ export const BadgeLadder: React.FC<{progress: number; frame: number}> = ({progre
             borderRadius: 2,
             width: `${(clamp(progress / 3) * (LADDER.w - 56 - 80))}px`,
             background: BRAND.gradient,
-            boxShadow: '0 0 12px rgba(99,102,241,0.8)',
+            boxShadow: `0 0 12px ${alpha(BRAND.indigo, 0.8)}`,
           }}
         />
         {BADGE_LABELS.map((label, i) => {
@@ -462,7 +463,7 @@ export const BadgeLadder: React.FC<{progress: number; frame: number}> = ({progre
                   alignItems: 'center',
                   justifyContent: 'center',
                   transform: `scale(${0.7 + 0.3 * Math.min(1, pop)})`,
-                  filter: active > 0.5 ? `drop-shadow(0 0 ${i === level ? 16 : 6}px rgba(99,102,241,0.8))` : 'grayscale(1) brightness(0.55)',
+                  filter: active > 0.5 ? `drop-shadow(0 0 ${i === level ? 16 : 6}px ${alpha(BRAND.indigo, 0.8)})` : 'grayscale(1) brightness(0.55)',
                 }}
               >
                 <MemberBadge size={58} level={i} id={`ladder${i}`} shine={i === level ? (frame % 45) / 45 : undefined} />

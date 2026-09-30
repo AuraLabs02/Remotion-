@@ -1,4 +1,5 @@
 import React from 'react';
+import {BRAND} from '../config/channel';
 import {FONT, YT} from '../theme/tokens';
 import {Icon, type IconName} from './Icon';
 
@@ -10,9 +11,9 @@ const VARIANTS: Record<PillVariant, {bg: string; fg: string; hover: string}> = {
   cta: {bg: YT.cta, fg: YT.ctaText, hover: '#65b8ff'},
   ghost: {bg: 'transparent', fg: YT.cta, hover: 'rgba(62,166,255,0.15)'},
   brand: {
-    bg: 'linear-gradient(135deg, #22d3ee 0%, #3b82f6 50%, #8b5cf6 100%)',
+    bg: BRAND.gradient,
     fg: '#fff',
-    hover: 'linear-gradient(135deg, #5ee4f5 0%, #6aa2ff 50%, #a684ff 100%)',
+    hover: BRAND.gradientHover,
   },
 };
 

@@ -21,9 +21,9 @@ export const CustomEmoji: React.FC<{name: EmojiName; size?: number; style?: Reac
             <circle cx="23" cy="18.5" r="6.5" />
             <rect x="10" y="17" width="13" height="8" />
           </g>
-          <circle cx="13" cy="17" r="1.6" fill="#0b1130" />
-          <circle cx="20" cy="17" r="1.6" fill="#0b1130" />
-          <path d="M12.5 20.5c2 2.4 6 2.4 8 0" stroke="#0b1130" strokeWidth="1.8" fill="none" strokeLinecap="round" />
+          <circle cx="13" cy="17" r="1.6" fill={BRAND.night} />
+          <circle cx="20" cy="17" r="1.6" fill={BRAND.night} />
+          <path d="M12.5 20.5c2 2.4 6 2.4 8 0" stroke={BRAND.night} strokeWidth="1.8" fill="none" strokeLinecap="round" />
           <circle cx="10.5" cy="20.5" r="1.4" fill="#ff8fb1" opacity="0.8" />
           <circle cx="22.5" cy="20.5" r="1.4" fill="#ff8fb1" opacity="0.8" />
         </svg>

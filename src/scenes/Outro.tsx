@@ -6,6 +6,7 @@ import {Confetti, Rays, Shockwave, Sparkles} from '../fx/Particles';
 import {Backdrop, Bokeh, Flash} from '../fx/Stage';
 import {SplitText, Typewriter} from '../fx/Type';
 import {Camera, type CamKey, Place} from '../lib/camera';
+import {alpha, mixHex} from '../config/palette';
 import {clamp, EASE, kf, lerp, springAt, SPRING} from '../lib/motion';
 import {FONT} from '../theme/tokens';
 import {ChannelAvatar, MemberBadge} from '../ui/Brand';
@@ -144,7 +145,7 @@ export const Outro: React.FC = () => {
       ) : (
         <>
           <Backdrop frame={f} grid={0.6} glow={1.2} />
-          <Rays frame={f} x={WIDTH / 2} y={330} opacity={0.45} color="rgba(120,150,255,0.22)" />
+          <Rays frame={f} x={WIDTH / 2} y={330} opacity={0.45} color={alpha(BRAND.light, 0.22)} />
           <Bokeh frame={f} count={18} seed="end" color={BRAND.cyan} />
           <AbsoluteFill style={{alignItems: 'center'}}>
             <div style={{position: 'absolute', top: 330 - 118, left: WIDTH / 2 - 118, width: 236, height: 236, transform: `scale(${av})`}}>
@@ -154,10 +155,10 @@ export const Outro: React.FC = () => {
                   inset: 0,
                   borderRadius: '50%',
                   background: `conic-gradient(from ${ringRot}deg, ${BRAND.cyan}, ${BRAND.blue}, ${BRAND.violet}, ${BRAND.pink}, ${BRAND.cyan})`,
-                  boxShadow: `0 0 60px rgba(59,130,246,0.6)`,
+                  boxShadow: `0 0 60px ${alpha(BRAND.blue, 0.6)}`,
                 }}
               />
-              <ChannelAvatar size={220} style={{position: 'absolute', left: 8, top: 8, boxShadow: '0 0 0 6px #070b1d'}} />
+              <ChannelAvatar size={220} style={{position: 'absolute', left: 8, top: 8, boxShadow: `0 0 0 6px ${BRAND.deep}`}} />
               <div
                 style={{
                   position: 'absolute',
@@ -165,7 +166,7 @@ export const Outro: React.FC = () => {
                   bottom: 2,
                   transform: `scale(${EASE.outBack(clamp((f - T.click - 4) / 12))})`,
                   borderRadius: 16,
-                  background: '#070b1d',
+                  background: BRAND.deep,
                   padding: 5,
                 }}
               >
@@ -273,7 +274,7 @@ export const Outro: React.FC = () => {
               <ClickRing x={1046} y={692} p={(f - T.click) / 14} />
             </>
           ) : null}
-          <Flash frame={f} at={T.endCard} dur={12} color="#dfe8ff" peak={0.9} />
+          <Flash frame={f} at={T.endCard} dur={12} color={mixHex(BRAND.light, '#ffffff', 0.6)} peak={0.9} />
         </>
       )}
       <AbsoluteFill style={{background: '#000', opacity: fadeOut}} />

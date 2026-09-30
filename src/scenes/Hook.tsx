@@ -5,6 +5,7 @@ import {b, HEIGHT, WIDTH} from '../config/timing';
 import {Backdrop} from '../fx/Stage';
 import {Shockwave, Sparkles} from '../fx/Particles';
 import {SplitText} from '../fx/Type';
+import {alpha} from '../config/palette';
 import {clamp, EASE, kf, lerp, shake, springAt, SPRING} from '../lib/motion';
 import {FONT} from '../theme/tokens';
 import {YouTubeIcon} from '../ui/Brand';
@@ -67,7 +68,7 @@ export const Hook: React.FC = () => {
             height: 3,
             borderRadius: 2,
             opacity: lineO,
-            background: `linear-gradient(90deg, rgba(34,211,238,0), ${BRAND.cyan}, #fff, ${BRAND.violet}, rgba(139,92,246,0))`,
+            background: `linear-gradient(90deg, ${alpha(BRAND.cyan, 0)}, ${BRAND.cyan}, #fff, ${BRAND.violet}, ${alpha(BRAND.violet, 0)})`,
             boxShadow: `0 0 24px ${BRAND.cyan}, 0 0 60px ${BRAND.blue}`,
           }}
         />
@@ -157,7 +158,7 @@ export const Hook: React.FC = () => {
                   WebkitBackgroundClip: 'text',
                   backgroundClip: 'text',
                   clipPath: `inset(0 ${100 - fill * 100}% 0 0)`,
-                  filter: `drop-shadow(0 0 30px rgba(59,130,246,0.55))`,
+                  filter: `drop-shadow(0 0 30px ${alpha(BRAND.blue, 0.55)})`,
                 }}
               >
                 MEMBER

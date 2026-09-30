@@ -5,6 +5,7 @@ import {b, FRAMES_PER_BEAT, HEIGHT, WIDTH} from '../config/timing';
 import {Confetti, Rays, Shockwave, Sparkles} from '../fx/Particles';
 import {Bokeh, Flash} from '../fx/Stage';
 import {SplitText} from '../fx/Type';
+import {alpha, mixHex} from '../config/palette';
 import {clamp, EASE, kf, lerp, shake, springAt, SPRING} from '../lib/motion';
 import {FONT} from '../theme/tokens';
 import {MemberBadge} from '../ui/Brand';
@@ -88,10 +89,10 @@ export const Drop: React.FC = () => {
         {/* stage */}
         <AbsoluteFill
           style={{
-            background: `radial-gradient(ellipse 60% 55% at 50% 38%, rgba(59,130,246,${0.45 + pulse * 0.15}) 0%, rgba(99,102,241,0.18) 45%, rgba(7,11,29,0) 75%), radial-gradient(ellipse 50% 40% at 50% 100%, rgba(139,92,246,0.35) 0%, rgba(139,92,246,0) 70%), ${BRAND.deep}`,
+            background: `radial-gradient(ellipse 60% 55% at 50% 38%, ${alpha(BRAND.blue, 0.45 + pulse * 0.15)} 0%, ${alpha(BRAND.indigo, 0.18)} 45%, ${alpha(BRAND.deep, 0)} 75%), radial-gradient(ellipse 50% 40% at 50% 100%, ${alpha(BRAND.violet, 0.35)} 0%, ${alpha(BRAND.violet, 0)} 70%), ${BRAND.deep}`,
           }}
         />
-        <Rays frame={f} x={CX} y={BADGE_Y} opacity={(0.55 + pulse * 0.25) * lerp(0.35, 1, celebration)} color="rgba(140,170,255,0.28)" />
+        <Rays frame={f} x={CX} y={BADGE_Y} opacity={(0.55 + pulse * 0.25) * lerp(0.35, 1, celebration)} color={alpha(BRAND.light, 0.28)} />
         <Bokeh frame={f} count={26} seed="drop" color={BRAND.violet} opacity={0.9} />
 
         <AbsoluteFill
@@ -110,7 +111,7 @@ export const Drop: React.FC = () => {
               width: 640,
               height: 640,
               borderRadius: '50%',
-              background: `radial-gradient(circle, rgba(99,102,241,${0.55 + pulse * 0.3}) 0%, rgba(34,211,238,0.15) 40%, rgba(0,0,0,0) 70%)`,
+              background: `radial-gradient(circle, ${alpha(BRAND.indigo, 0.55 + pulse * 0.3)} 0%, ${alpha(BRAND.cyan, 0.15)} 40%, rgba(0,0,0,0) 70%)`,
               transform: `scale(${pop * (1 + pulse * 0.06)})`,
             }}
           />
@@ -139,11 +140,11 @@ export const Drop: React.FC = () => {
               mode="pop"
               style={{fontFamily: FONT.display, fontWeight: 900, fontSize: 150, letterSpacing: -6, marginTop: 4}}
               charStyle={() => ({
-                backgroundImage: `linear-gradient(180deg, #ffffff 30%, #b9c8ff 100%)`,
+                backgroundImage: `linear-gradient(180deg, #ffffff 30%, ${mixHex(BRAND.light, '#ffffff', 0.4)} 100%)`,
                 WebkitBackgroundClip: 'text',
                 backgroundClip: 'text',
                 color: 'transparent',
-                filter: 'drop-shadow(0 8px 30px rgba(59,130,246,0.55))',
+                filter: `drop-shadow(0 8px 30px ${alpha(BRAND.blue, 0.55)})`,
               })}
             />
             <div
@@ -218,7 +219,7 @@ export const Drop: React.FC = () => {
                 <MemberBadge size={bsize} level={tier.level} id={`x${k}`} />
               </div>
             ))}
-            <div style={{position: 'absolute', inset: 0, filter: `drop-shadow(0 0 ${30 + pulse * 30}px rgba(99,102,241,0.9))`}}>
+            <div style={{position: 'absolute', inset: 0, filter: `drop-shadow(0 0 ${30 + pulse * 30}px ${alpha(BRAND.indigo, 0.9)})`}}>
               <MemberBadge size={bsize} level={tier.level} id="hero" shine={shine > 0 && shine < 1 ? shine : undefined} />
             </div>
           </div>

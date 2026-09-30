@@ -1,6 +1,7 @@
 import React from 'react';
 import {Img} from 'remotion';
 import {BRAND, CHANNEL} from '../config/channel';
+import {alpha, mixHex} from '../config/palette';
 import {FONT} from '../theme/tokens';
 import {REAL} from './assets';
 
@@ -120,7 +121,7 @@ export const ChannelAvatar: React.FC<{size: number; ring?: number; ringColor?: s
       flexShrink: 0,
       position: 'relative',
       boxShadow: ring ? `0 0 0 ${ring}px ${ringColor}` : undefined,
-      background: `radial-gradient(circle at 35% 30%, #1a2458 0%, ${BRAND.night} 55%, ${BRAND.deep} 100%)`,
+      background: `radial-gradient(circle at 35% 30%, ${mixHex(BRAND.blue, '#05060d', 0.72)} 0%, ${BRAND.night} 55%, ${BRAND.deep} 100%)`,
       ...style,
     }}
   >
@@ -163,9 +164,9 @@ export const LetterAvatar: React.FC<{size: number; letter: string; color: string
 );
 
 const BADGE_GRADIENTS: [string, string][] = [
-  ['#22d3ee', '#3b82f6'],
-  ['#3b82f6', '#8b5cf6'],
-  ['#8b5cf6', '#ec4899'],
+  [BRAND.cyan, BRAND.blue],
+  [BRAND.blue, BRAND.violet],
+  [BRAND.violet, BRAND.pink],
   ['#fbbf24', '#f97316'],
 ];
 
@@ -259,7 +260,7 @@ export const ChannelBanner: React.FC<{w: number; h: number; radius?: number; min
         borderRadius: radius,
         overflow: 'hidden',
         position: 'relative',
-        background: `radial-gradient(ellipse 60% 120% at 78% 50%, rgba(59,130,246,0.55) 0%, rgba(59,130,246,0) 60%), radial-gradient(ellipse 40% 90% at 95% 10%, rgba(139,92,246,0.55) 0%, rgba(139,92,246,0) 70%), linear-gradient(100deg, ${BRAND.deep} 0%, #0c1640 55%, #16114a 100%)`,
+        background: `radial-gradient(ellipse 60% 120% at 78% 50%, ${alpha(BRAND.blue, 0.55)} 0%, ${alpha(BRAND.blue, 0)} 60%), radial-gradient(ellipse 40% 90% at 95% 10%, ${alpha(BRAND.violet, 0.55)} 0%, ${alpha(BRAND.violet, 0)} 70%), linear-gradient(100deg, ${BRAND.deep} 0%, ${mixHex(BRAND.blue, '#05060d', 0.78)} 55%, ${mixHex(BRAND.violet, '#05060d', 0.78)} 100%)`,
       }}
     >
       <div
@@ -270,7 +271,7 @@ export const ChannelBanner: React.FC<{w: number; h: number; radius?: number; min
           fontFamily: FONT.mono,
           fontSize: h * 0.085,
           lineHeight: 1.75,
-          color: 'rgba(148,197,255,0.075)',
+          color: alpha(BRAND.light, 0.075),
           whiteSpace: 'nowrap',
         }}
       >

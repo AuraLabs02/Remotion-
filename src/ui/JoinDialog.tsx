@@ -1,5 +1,6 @@
 import React from 'react';
 import {BRAND, CHANNEL, TIERS} from '../config/channel';
+import {alpha} from '../config/palette';
 import {clamp, EASE} from '../lib/motion';
 import {FONT, YT} from '../theme/tokens';
 import {ChannelAvatar, ChannelBanner, MemberBadge} from './Brand';
@@ -65,7 +66,7 @@ const TierCard: React.FC<{
           borderRadius: 14,
           opacity: glow,
           background: `conic-gradient(from ${angle}deg, ${BRAND.cyan}, ${BRAND.blue}, ${BRAND.violet}, ${BRAND.pink}, ${BRAND.cyan})`,
-          boxShadow: `0 0 ${40 * glow}px rgba(99,102,241,${0.55 * glow})`,
+          boxShadow: `0 0 ${40 * glow}px ${alpha(BRAND.indigo, 0.55 * glow)}`,
         }}
       />
       <div
@@ -83,7 +84,7 @@ const TierCard: React.FC<{
           style={{
             position: 'absolute',
             inset: 0,
-            background: `radial-gradient(circle at 20% 0%, rgba(59,130,246,${0.22 * glow}) 0%, rgba(59,130,246,0) 60%)`,
+            background: `radial-gradient(circle at 20% 0%, ${alpha(BRAND.blue, 0.22 * glow)} 0%, ${alpha(BRAND.blue, 0)} 60%)`,
           }}
         />
         {t.popular ? (
