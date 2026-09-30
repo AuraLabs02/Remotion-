@@ -1,0 +1,24 @@
+{
+  "name": "cloud-codes-membership-reel",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Motion graphics showreel: joining the Cloud Codes YouTube channel membership, built with Remotion.",
+  "scripts": {
+    "studio": "remotion studio src/index.ts",
+    "audio": "node scripts/export-cues.mjs && python3 scripts/generate_audio.py",
+    "render": "remotion render src/index.ts MembershipReel out/cloud-codes-membership-reel.mp4",
+    "still": "remotion still src/index.ts MembershipReel out/still.png",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.530",
+    "@remotion/fonts": "4.0.530",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "remotion": "4.0.530"
+  },
+  "devDependencies": {
+    "@types/react": "19.2.18",
+    "typescript": "5.9.3"
+  }
+}
