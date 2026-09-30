@@ -2,12 +2,16 @@
 
 A 40-second UI motion showreel of a viewer joining the **[Cloud Codes](https://youtube.com/@Cloud-Codes)** channel membership, built entirely in code with [Remotion](https://remotion.dev).
 
+[![Cloud Codes membership reel: click to watch](out/preview/poster.jpg)](out/cloud-codes-membership-reel.mp4)
+
 - **Output:** 1920×1080 · 30 fps · H.264 + AAC stereo, at [`out/cloud-codes-membership-reel.mp4`](out/cloud-codes-membership-reel.mp4)
 - **UI:** a faithful recreation of YouTube's desktop dark theme: masthead, guide, channel page, the Join dialog with levels, checkout, the welcome dialog, live chat with member badges, and the members-only shelf.
 - **Motion:** a CSS-3D virtual camera with velocity-based motion blur, exploded 3D UI layers, shared-element morphs (the Join button grows into the dialog, and the Buy button morphs into a spinner and then a check mark), kinetic typography, confetti physics, light sweeps, rays and film grain.
 - **Sound:** an original 120 BPM track and 26 sound effects, all synthesised from scratch in Python (no samples). Every cut, click and hit lands on the beat.
 
 ## Storyboard
+
+![Storyboard](out/preview/storyboard.jpg)
 
 | Time | Chapter | What happens |
 | --- | --- | --- |
